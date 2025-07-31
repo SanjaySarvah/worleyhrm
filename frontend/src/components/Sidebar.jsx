@@ -41,6 +41,8 @@ const Sidebar = () => {
             {link('/admin/create-employee', 'Employee Creation', 'bi-person-plus-fill')}
             {link('/admin/leave-status', 'Leave Status', 'bi-list-check')}
             {link('/admin/ProfileUpdate', 'Profile Update', 'bi-list-check')}
+            {link('/admin/CalendarManager', 'Calendar Manager', 'bi-list-check')}
+            {link('/admin/ViewProfile', 'My Profile', 'bi-list-check')}
           </>
         );
       case 'hr':
@@ -57,6 +59,7 @@ const Sidebar = () => {
             {link('/staff/leave-status', 'Leave Status', 'bi-list-check')}
              {link('/staff/LeaveForm', 'Leave Form', 'bi-list-check')}
              {link('/staff/ProfileUpdate', 'Profile Update', 'bi-list-check')}
+             {link('/admin/ViewProfile', 'My Profile', 'bi-list-check')}
           </>
         );
       default:

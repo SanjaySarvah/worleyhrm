@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const upload = require('../middleware/upload');
-const Form = require('../models/Form'); // ✅ needed for the experience limit middleware
+const Form = require('../models/Form'); 
 
 const {
   createForm,
@@ -13,7 +13,9 @@ const {
   addExperience,
   updateExperience,
   deleteExperience,
-  updateBankDetails
+  updateBankDetails,
+  uploadProfileImage,
+  getProfileImage,
 } = require('../controllers/form.controller');
 
 // ============================
@@ -165,5 +167,14 @@ router.patch(
   upload.single('bankPassbook'),
   updateBankDetails
 );
+
+router.patch(
+  '/profile-image/:formId',
+  upload.fields([{ name: 'profileImage', maxCount: 1 }]),
+  uploadProfileImage
+);
+
+// Get profile image
+router.get('/profile-image/:formId', getProfileImage);
 
 module.exports = router;

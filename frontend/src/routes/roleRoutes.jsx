@@ -57,13 +57,16 @@ import HrDashboard from '../pages/Dashboard/HrDashboard';
 import StaffDashboard from '../pages/Dashboard/StaffDashboard';
 import LeaveForm from '../pages/LeaveForm';
 import ProfileUpdate from '../pages/ProfileUpdate';
-
+import CalendarManager from '../pages/CalendarManager';
+import ViewProfile from '../pages/ViewProfile';
 const roleRoutes = {
   admin: [
     { path: '/admin', element: <AdminDashboard /> },
     { path: '/admin/create-employee', element: <CreateEmployee /> },
     { path: '/admin/leave-status', element: <LeaveStatus /> },
       { path: '/admin/ProfileUpdate', element: <ProfileUpdate /> },
+         { path: '/admin/CalendarManager', element: <CalendarManager /> },
+           { path: '/admin/ViewProfile', element: <ViewProfile /> },
      
   ],
   hr: [

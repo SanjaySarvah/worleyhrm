@@ -1,4 +1,6 @@
 // controllers/form.controller.js
+const path = require('path');
+const fs = require('fs');
 const Form = require('../models/Form');
 const asyncHandler = require('../utils/asyncHandler');
 const toRelativeUploadPath = require('../utils/filePath');
@@ -176,4 +178,61 @@ exports.updateBankDetails = asyncHandler(async (req, res) => {
 
   if (!form) return res.status(404).json({ message: 'Form not found' });
   res.json({ message: 'bankDetails updated', data: form.bankDetails });
+});
+
+
+
+// ✅ PATCH: Update Profile Image
+// ✅ PATCH: Update Profile Image
+exports.uploadProfileImage = asyncHandler(async (req, res) => {
+  const { formId } = req.params;
+
+  // Ensure file was uploaded
+  if (!req.files || !req.files.profileImage || !req.files.profileImage[0]) {
+    return res.status(400).json({ message: 'No profile image provided' });
+  }
+
+  const file = req.files.profileImage[0];
+  const fileName = path.basename(file.path); // Extract just the filename
+
+  // Optional: Log for debugging
+  console.log(`Uploading profile image for formId=${formId}`);
+  console.log(`Saved file: ${fileName}`);
+
+  // Check if form exists
+  const form = await Form.findOneAndUpdate(
+    { formId },
+    { $set: { 'personalDetails.profileImage': fileName } },
+    { new: true }
+  );
+
+  if (!form) {
+    return res.status(404).json({ message: 'Form not found' });
+  }
+
+  res.status(200).json({
+    message: 'Profile image updated successfully',
+    profileImageUrl: `http://localhost:5000/uploads/${fileName}`
+  });
+});
+
+// ✅ GET: Fetch Profile Image
+exports.getProfileImage = asyncHandler(async (req, res) => {
+  const { formId } = req.params;
+
+  const form = await Form.findOne({ formId });
+  if (!form) return res.status(404).json({ message: 'Form not found' });
+
+  const fileName = form.personalDetails?.profileImage;
+
+  if (!fileName) {
+    return res.redirect('https://www.gravatar.com/avatar/?d=mp');
+  }
+
+  const filePath = path.join(__dirname, '..', 'uploads', fileName);
+  if (!fs.existsSync(filePath)) {
+    return res.redirect('https://www.gravatar.com/avatar/?d=mp');
+  }
+
+  res.sendFile(filePath);
 });
