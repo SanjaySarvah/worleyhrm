@@ -36,10 +36,16 @@
     border: 1px solid #ccc;
     background: #f1f1f157;
   }
-  .tab-head{
+  /* .tab-head{
     background-color: #093281;
     color: #ffffff;
     padding: 13px;
+  } */
+  .tab-head {
+    background-color: #1f58c5;
+    color: #ffffff;
+    padding: 10px;
+    border-radius: 15px;
   }
   /* Responsive behavior */
   @media screen and (max-width: 600px) {

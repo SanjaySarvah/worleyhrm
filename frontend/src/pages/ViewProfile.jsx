@@ -3,6 +3,7 @@ import ViewPersonalDetails from "../components/ViewProfile/ViewPersonalDetails";
 import ViewContactDetails from "../components/ViewProfile/ViewContactDetails";
 import ViewWorkingDetails from "../components/ViewProfile/ViewWorkingDetails";
 import ViewBankDetails from "../components/ViewProfile/ViewBankDetails";
+import ViewDocuments from "../components/ViewProfile/ViewDocuments";
 import { FaEdit } from "react-icons/fa";
 
 const FALLBACK_AVATAR = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
@@ -10,13 +11,23 @@ const FALLBACK_AVATAR = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
 const ProfileAvatar = () => {
   const [formId, setFormId] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [userInfo, setUserInfo] = useState({ name: "", id: "", role: "" });
   const fileInputRef = React.useRef();
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      const user = JSON.parse(storedUser);
-      if (user.formId) setFormId(user.formId);
+      try {
+        const user = JSON.parse(storedUser);
+        if (user.formId) setFormId(user.formId);
+        setUserInfo({
+          name: user.name || "-",
+          id: user.id || "-",
+          role: user.role || "-",
+        });
+      } catch (err) {
+        console.error("Invalid user data in localStorage", err);
+      }
     }
   }, []);
 
@@ -44,7 +55,7 @@ const ProfileAvatar = () => {
         method: "PATCH",
         body: formData,
       });
-      fetchImage();
+      fetchImage(); // refresh preview after upload
     } catch (err) {
       console.error("Upload failed", err);
     }
@@ -72,6 +83,12 @@ const ProfileAvatar = () => {
           onChange={handleFileChange}
           style={{ display: "none" }}
         />
+      </div>
+
+      <div style={styles.userInfoBox}>
+        <p style={styles.userLine}><strong>Name:</strong> {userInfo.name}</p>
+        <p style={styles.userLine}><strong>ID:</strong> {userInfo.id}</p>
+        <p style={styles.userLine}><strong>Role:</strong> {userInfo.role}</p>
       </div>
     </div>
   );
@@ -111,6 +128,7 @@ const tabs = [
   { id: "tab2", label: "📞 Contact Details", content: <ViewContactDetails /> },
   { id: "tab3", label: "💼 Working Details", content: <ViewWorkingDetails /> },
   { id: "tab4", label: "🏦 Bank Details", content: <ViewBankDetails /> },
+  { id: "tab5", label: "📄 Documents", content: <ViewDocuments /> },
 ];
 
 const ViewProfile = () => {
@@ -228,5 +246,13 @@ const styles = {
     padding: "15px",
     borderRadius: "8px",
     backgroundColor: "#fefefe",
+  },
+  userInfoBox: {
+    marginTop: "15px",
+    textAlign: "left",
+  },
+  userLine: {
+    margin: "4px 0",
+    color: "#444",
   },
 };

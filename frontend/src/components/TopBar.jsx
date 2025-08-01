@@ -64,10 +64,10 @@ const TopBar = () => {
       <style>
         {`
           .topbar {
-            background-color: #ffffff;
+            background-color: rgb(0 87 146);
             padding: 12px 24px;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
             border-bottom: 1px solid #ddd;
             position: sticky;
@@ -78,7 +78,7 @@ const TopBar = () => {
           .welcome-text {
             font-size: 18px;
             font-weight: 600;
-            color: #333;
+            color: #ffffff;
           }
 
           .actions {
@@ -92,12 +92,12 @@ const TopBar = () => {
             background: none;
             border: none;
             font-size: 18px;
-            color: #555;
+            color: #fff;
             cursor: pointer;
           }
 
           .bell-button:hover {
-            color: #000;
+            color: red;
           }
 
           .badge {
@@ -134,7 +134,7 @@ const TopBar = () => {
 
       <div className="topbar">
         <div className="welcome-text">
-          Welcome {user?.name ?? user?.email ?? ''}
+          Welcome ! {user?.name ?? user?.email ?? ''}
         </div>
 
         <div className="actions">

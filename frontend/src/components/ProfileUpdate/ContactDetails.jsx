@@ -87,13 +87,23 @@ const ContactDetails = () => {
         onClose={() => setMessage({ text: "", type: "" })}
       />
 
-<div className="d-flex justify-content-between align-items-center mb-3 tab-head">
-        <h4 className="fw-bold"><i className="bi bi-person-lines-fill me-2"></i> Contact Details</h4>
-        {!isEditing && (
+
+<div className="d-flex justify-content-between align-items-center text-white rounded mb-4">
+    <h5></h5>
+  {!isEditing && (
+           <button className="btn btn-primary" onClick={() => setIsEditing(true)}>
+           <i className="bi bi-pencil-square me-1"></i> Edit Details
+         </button>
+        )}
+  </div>
+
+<div className="d-flex justify-content-between align-items-center bg-primary text-white rounded mb-4 p-2">
+        <h5 className="fw-bold"><i className="bi bi-person-lines-fill me-2"></i> Contact Details</h5>
+        {/* {!isEditing && (
           <button className="btn btn-primary" onClick={() => setIsEditing(true)}>
             <i className="bi bi-pencil-square me-1"></i> Edit Details
           </button>
-        )}
+        )} */}
       </div>
 
       <div className="card shadow-sm border-0">
@@ -170,10 +180,12 @@ const ContactDetails = () => {
               />
             </div>
 
-            <div className="col-12 mb-2 tab-head">
-              <h4 className="fw-bold">
+
+
+            <div className="d-flex justify-content-between align-items-center bg-primary text-white rounded mb-4 p-2">
+              <h5 className="fw-bold">
                 <i className="bi bi-telephone-forward me-2"></i>Emergency Contact
-              </h4>
+              </h5>
             </div>
 
             <div className="col-md-4 mb-3">

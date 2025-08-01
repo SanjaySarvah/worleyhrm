@@ -96,12 +96,17 @@ const BankDetails = () => {
     <>
       {/* Edit Button Top Right */}
       {!isEditing && (
-        <div className="d-flex justify-content-end mt-2 px-4">
+        <div className="d-flex justify-content-end mt-2 mb-3 px-4">
           <Button variant="primary" onClick={() => setIsEditing(true)}>
             <i className="bi bi-pencil-square me-2"></i>Edit Details
           </Button>
         </div>
       )}
+
+<div className="d-flex justify-content-between align-items-center bg-primary text-white rounded mb-4 p-2">
+        <h5 className="fw-bold"><i className="bi bi-person-lines-fill me-2"></i> Bank Details</h5>
+
+      </div>
 
       <Card className="p-4 m-4 shadow">
         {/* <h4 className="mb-3">🏦 Bank Details</h4> */}

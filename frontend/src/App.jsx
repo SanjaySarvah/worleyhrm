@@ -13,7 +13,7 @@ import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 
 import roleRoutes from './routes/roleRoutes.jsx'; // ✅ make sure to import the correct file
-
+import 'bootstrap-icons/font/bootstrap-icons.css';
 function AppLayout() {
   const location = useLocation();
   const { user } = useAuth();

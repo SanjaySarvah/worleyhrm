@@ -111,14 +111,17 @@ const PersonalDetails = () => {
         type={message.type}
         onClose={() => setMessage({ text: "", type: "" })}
       />
-
-      <div className="d-flex justify-content-between align-items-center mb-3 tab-head">
-        <h4 className="fw-bold"><i className="bi bi-person-lines-fill me-2"></i> Personal Details</h4>
-        {!isEditing && (
+  <div className="d-flex justify-content-between align-items-center text-white rounded mb-4">
+    <h5></h5>
+  {!isEditing && (
           <button className="btn btn-primary" onClick={() => setIsEditing(true)}>
             <i className="bi bi-pencil-square me-1"></i> Edit Details
           </button>
         )}
+  </div>
+      <div className="d-flex justify-content-between align-items-center bg-primary text-white rounded mb-4 p-2">
+        <h5 className="fw-bold"><i className="bi bi-person-lines-fill me-2"></i> Personal Details</h5>
+
       </div>
 
       {fieldGroups.map((group, idx) => (

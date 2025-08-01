@@ -169,7 +169,7 @@ const WorkingDetails = () => {
               className="form-control"
             />
           </div>
-          <div className="col-md-4 d-flex align-items-end">
+          <div className="col-md-3 d-flex align-items-end">
             <button
               className="btn btn-primary w-100"
               onClick={handlePfEsiUpdate}
@@ -188,16 +188,9 @@ const WorkingDetails = () => {
         </button>
       </div> */}
 
-      <div className="d-flex justify-content-between align-items-center mb-3 tab-head">
-        <h4 className="modal-title mb-0">
-          <i
-            className="bi bi-telephone-forward me-2"
-            style={{ fontSize: "1.2rem", color: "#ffffff" }}
-          ></i>
-          Previous Experiences
-        </h4>
-
-        <button
+<div className="d-flex justify-content-between align-items-center text-white rounded mb-4">
+    <h5></h5>
+    <button
           className="btn btn-success d-flex align-items-center"
           data-bs-toggle="modal"
           data-bs-target="#addExperienceModal"
@@ -208,6 +201,28 @@ const WorkingDetails = () => {
           ></i>
           Add Experience
         </button>
+  </div>
+
+      <div className="d-flex justify-content-between align-items-center bg-primary text-white rounded mb-4 p-2">
+        <h5 className="modal-title mb-0">
+          <i
+            className="bi bi-telephone-forward me-2"
+            style={{ fontSize: "1.2rem", color: "#ffffff" }}
+          ></i>
+          Previous Experiences
+        </h5>
+
+        {/* <button
+          className="btn btn-success d-flex align-items-center"
+          data-bs-toggle="modal"
+          data-bs-target="#addExperienceModal"
+        >
+          <i
+            className="bi bi-plus-circle me-2"
+            style={{ fontSize: "1.2rem", color: "#ffffff" }}
+          ></i>
+          Add Experience
+        </button> */}
       </div>
 
       {/* <div className="d-flex justify-content-end">

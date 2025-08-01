@@ -89,16 +89,16 @@ const ViewPersonalDetails = () => {
         { label: "Passport Number", name: "passportNumber" },
       ],
     },
-    {
-      title: "Documents Upload",
-      icon: "bi-upload",
-      fields: [
-        { label: "Profile Image", name: "profileImage" },
-        { label: "Aadhaar Card", name: "aadhaarCard" },
-        { label: "PAN Card", name: "panCard" },
-        { label: "Passport", name: "passport" },
-      ],
-    },
+    // {
+    //   title: "Documents Upload",
+    //   icon: "bi-upload",
+    //   fields: [
+    //     { label: "Profile Image", name: "profileImage" },
+    //     { label: "Aadhaar Card", name: "aadhaarCard" },
+    //     { label: "PAN Card", name: "panCard" },
+    //     { label: "Passport", name: "passport" },
+    //   ],
+    // },
   ];
 
   if (error) return <p className="text-danger">{error}</p>;
@@ -125,7 +125,7 @@ const ViewPersonalDetails = () => {
           {/* Section 1: First 3 rows and Profile Image */}
           <Row>
             {/* Left: First 3 rows */}
-            <Col lg={9} xs={12}>
+            <Col lg={12} xs={12}>
               <Form>
                 {fieldGroups.slice(0, 3).map((group, idx) => (
                   <Row className="mb-4" key={idx}>

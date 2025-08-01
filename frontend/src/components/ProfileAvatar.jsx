@@ -6,6 +6,7 @@ const FALLBACK_AVATAR = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
 
 const ProfileImageUploader = () => {
   const [formId, setFormId] = useState(null);
+  const [userInfo, setUserInfo] = useState({ name: "", id: "", role: "" });
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,6 +19,11 @@ const ProfileImageUploader = () => {
       try {
         const user = JSON.parse(storedUser);
         if (user.formId) setFormId(user.formId);
+        setUserInfo({
+          name: user.name || "",
+          id: user.id || "",
+          role: user.role || "",
+        });
       } catch {
         console.error("Invalid user data in localStorage");
       }
@@ -37,9 +43,12 @@ const ProfileImageUploader = () => {
   }, [formId]);
 
   const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0]);
-    setMessage("");
-    handleUpload(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setMessage("");
+      handleUpload(file);
+    }
   };
 
   const handleUpload = async (file) => {
@@ -64,33 +73,50 @@ const ProfileImageUploader = () => {
       setLoading(false);
     }
   };
-
   return (
-    <div style={styles.wrapper}>
-      <div style={styles.imageContainer}>
-        <img
-          src={previewUrl || FALLBACK_AVATAR}
-          alt="Profile"
-          style={styles.image}
-          onError={(e) => (e.target.src = FALLBACK_AVATAR)}
-        />
-        <div
-          style={styles.editIcon}
-          onClick={() => fileInputRef.current.click()}
-        >
-          <FaEdit color="#fff" />
+    <>
+      <h1 style={{ color: "red", fontSize: "40px" }}>TEST data</h1>
+      <div style={styles.wrapper}>
+        {/* ✅ Profile image and uploader */}
+        <div style={styles.imageContainer}>
+          <img
+            src={previewUrl || FALLBACK_AVATAR}
+            alt="Profile"
+            style={styles.image}
+            onError={(e) => (e.target.src = FALLBACK_AVATAR)}
+          />
+          <div
+            style={styles.editIcon}
+            onClick={() => fileInputRef.current.click()}
+          >
+            <FaEdit color="#fff" />
+          </div>
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            style={{ display: "none" }}
+          />
         </div>
-        <input
-          type="file"
-          accept="image/*"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          style={{ display: "none" }}
-        />
+  
+        {/* ✅ User info */}
+        <div style={styles.userInfoBox}>
+          <p style={styles.userLine}><strong>Name:</strong> {userInfo.name || "-"}</p>
+          <p style={styles.userLine}><strong>ID:</strong> {userInfo.id || "-"}</p>
+          <p style={styles.userLine}><strong>Role:</strong> {userInfo.role || "-"}</p>
+        </div>
+  
+        {/* ✅ Message */}
+        <p style={styles.message}>{loading ? "Uploading..." : message}</p>
       </div>
-      <p style={styles.message}>{loading ? "Uploading..." : message}</p>
-    </div>
+
+
+    </>
   );
+
+
+
 };
 
 export default ProfileImageUploader;
@@ -103,8 +129,8 @@ const styles = {
   },
   imageContainer: {
     position: "relative",
-    width: "150px",
-    height: "150px",
+    width: "200px",
+    height: "200px",
     margin: "auto",
   },
   image: {
@@ -123,8 +149,20 @@ const styles = {
     padding: "6px",
     cursor: "pointer",
   },
+  userInfoBox: {
+    marginTop: "20px",
+    background: "#f8f9fa",
+    padding: "10px 20px",
+    borderRadius: "8px",
+    display: "inline-block",
+    textAlign: "left",
+  },
+  userLine: {
+    margin: "5px 0px",
+    fontSize: "16px",
+  },
   message: {
-    marginTop: "10px",
+    marginTop: "12px",
     color: "gray",
     fontSize: "14px",
   },
