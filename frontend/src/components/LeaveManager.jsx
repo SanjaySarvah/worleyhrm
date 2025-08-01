@@ -1,200 +1,133 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { PencilSquare, PlusCircle } from 'react-bootstrap-icons';
 
-const API_BASE = 'http://localhost:5000/api/calendar';
+const API_URL = 'http://localhost:5000/api/calendar';
+
+const initialFormState = {
+  date: '',
+  title: '',
+  description: '',
+  type: 'custom'
+};
 
 const CalendarManager = () => {
-  const currentYear = new Date().getFullYear();
-  const [year] = useState(currentYear);
-  const [month, setMonth] = useState(String(new Date().getMonth() + 1).padStart(2, '0'));
-  const [calendarDays, setCalendarDays] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [type, setType] = useState('working-day');
-  const [description, setDescription] = useState('');
+  const [formData, setFormData] = useState(initialFormState);
+  const [entries, setEntries] = useState([]);
   const [editingId, setEditingId] = useState(null);
 
-  const fetchCalendar = async () => {
-    try {
-      const res = await axios.get(`${API_BASE}/${year}/${month}`);
-      setCalendarDays(res.data);
-    } catch (err) {
-      console.error('Failed to fetch calendar:', err);
-    }
-  };
-
   useEffect(() => {
-    fetchCalendar();
-  }, [month]);
+    fetchEntries();
+  }, []);
 
-  const handleSubmit = async () => {
-    if (!selectedDate || !type) return;
-    const payload = {
-      date: selectedDate,
-      dayOfWeek: selectedDate.toLocaleDateString('en-US', { weekday: 'long' }),
-      type,
-      description,
-      year
-    };
+  const fetchEntries = async () => {
     try {
-      await axios.post(API_BASE, payload);
-      resetForm();
-      fetchCalendar();
+      const res = await axios.get(API_URL);
+      setEntries(res.data);
     } catch (err) {
-      console.error('Failed to submit data:', err);
+      console.error('Error fetching entries:', err);
     }
   };
 
-  const handleEdit = (day) => {
-    setSelectedDate(new Date(day.date));
-    setType(day.type);
-    setDescription(day.description);
-    setEditingId(day._id);
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleDelete = async (id) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      await axios.delete(`${API_BASE}/${id}`);
-      fetchCalendar();
+      if (editingId) {
+        await axios.put(`${API_URL}/${editingId}`, formData);
+      } else {
+        await axios.post(API_URL, formData);
+      }
+      setFormData(initialFormState);
+      setEditingId(null);
+      fetchEntries();
     } catch (err) {
-      console.error('Failed to delete entry:', err);
+      console.error('Submit error:', err);
     }
   };
 
-  const resetForm = () => {
-    setSelectedDate(new Date());
-    setType('working-day');
-    setDescription('');
-    setEditingId(null);
+  const handleEdit = (entry) => {
+    setFormData({
+      date: entry.date.split('T')[0],
+      title: entry.title,
+      description: entry.description,
+      type: entry.type
+    });
+    setEditingId(entry._id);
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row mb-4">
-        <div className="col-md-3">
-          <label className="form-label">Select Date</label>
-          <DatePicker
-            selected={selectedDate}
-            onChange={(date) => setSelectedDate(date)}
-            className="form-control"
-            dateFormat="yyyy-MM-dd"
-            showMonthDropdown
-            showYearDropdown
-            dropdownMode="select"
-            maxDate={new Date(`${year}-12-31`)}
-            minDate={new Date(`${year}-01-01`)}
-          />
+    <div className="container my-5">
+      <div className="card shadow-sm">
+        <div className="card-header bg-primary text-white">
+          <h4 className="mb-0">{editingId ? 'Update Calendar Entry' : 'Add New Calendar Entry'}</h4>
         </div>
-
-        <div className="col-md-3">
-          <label className="form-label">Type</label>
-          <select
-            className="form-select"
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-          >
-            <option value="working-day">Working Day</option>
-            <option value="holiday">Holiday</option>
-            <option value="optional-holiday">Optional Holiday</option>
-            <option value="weekend">Weekend</option>
-          </select>
-        </div>
-
-        <div className="col-md-4">
-          <label className="form-label">Description</label>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="e.g. Independence Day"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </div>
-
-        <div className="col-md-2 d-flex align-items-end">
-          <button
-            className="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
-            onClick={handleSubmit}
-          >
-            {editingId ? (
-              <>
-                <PencilSquare />
-                <strong>Update</strong>
-              </>
-            ) : (
-              <>
-                <PlusCircle />
-                <strong>Add</strong>
-              </>
-            )}
-          </button>
+        <div className="card-body">
+          <form onSubmit={handleSubmit} className="row g-3">
+            <div className="col-md-4">
+              <label className="form-label">Date</label>
+              <input type="date" name="date" className="form-control" value={formData.date} onChange={handleChange} required />
+            </div>
+            <div className="col-md-4">
+              <label className="form-label">Title</label>
+              <input type="text" name="title" className="form-control" value={formData.title} onChange={handleChange} required />
+            </div>
+            <div className="col-md-4">
+              <label className="form-label">Type</label>
+              <select name="type" className="form-select" value={formData.type} onChange={handleChange}>
+                <option value="holiday">Holiday</option>
+                <option value="event">Event</option>
+                <option value="reminder">Reminder</option>
+                <option value="custom">Custom</option>
+              </select>
+            </div>
+            <div className="col-12">
+              <label className="form-label">Description</label>
+              <textarea name="description" className="form-control" rows="2" value={formData.description} onChange={handleChange} />
+            </div>
+            <div className="col-12 d-flex justify-content-end">
+              <button type="submit" className="btn btn-success">{editingId ? 'Update Entry' : 'Add Entry'}</button>
+            </div>
+          </form>
         </div>
       </div>
 
-      {editingId && (
-        <div className="text-end mb-3">
-          <button className="btn btn-secondary btn-sm" onClick={resetForm}>
-            Cancel Editing
-          </button>
+      <div className="mt-5">
+        <h4>All Calendar Entries</h4>
+        <div className="table-responsive">
+          <table className="table table-bordered table-striped mt-3">
+            <thead className="table-dark">
+              <tr>
+                <th>Date</th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {entries.map(entry => (
+                <tr key={entry._id}>
+                  <td>{entry.date.split('T')[0]}</td>
+                  <td>{entry.title}</td>
+                  <td><span className="badge bg-secondary text-capitalize">{entry.type}</span></td>
+                  <td>{entry.description}</td>
+                  <td>
+                    <button className="btn btn-sm btn-primary" onClick={() => handleEdit(entry)}>Edit</button>
+                  </td>
+                </tr>
+              ))}
+              {entries.length === 0 && (
+                <tr>
+                  <td colSpan="5" className="text-center">No entries found.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
-
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h5>Entries for {year}-{month}</h5>
-        <select
-          className="form-select w-auto"
-          value={month}
-          onChange={(e) => setMonth(e.target.value.padStart(2, '0'))}
-        >
-          {Array.from({ length: 12 }, (_, i) => {
-            const m = String(i + 1).padStart(2, '0');
-            return <option key={m} value={m}>{m}</option>;
-          })}
-        </select>
       </div>
-
-      <table className="table table-bordered">
-        <thead className="table-light">
-          <tr>
-            <th>Date</th>
-            <th>Day</th>
-            <th>Type</th>
-            <th>Description</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {calendarDays.map((day) => (
-            <tr key={day._id}>
-              <td>{new Date(day.date).toLocaleDateString()}</td>
-              <td>{day.dayOfWeek}</td>
-              <td>{day.type}</td>
-              <td>{day.description}</td>
-              <td>
-                <button
-                  className="btn btn-sm btn-primary me-2"
-                  onClick={() => handleEdit(day)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="btn btn-sm btn-danger"
-                  onClick={() => handleDelete(day._id)}
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-          {calendarDays.length === 0 && (
-            <tr>
-              <td colSpan="5" className="text-center">No entries found.</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
     </div>
   );
 };

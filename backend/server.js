@@ -33,6 +33,9 @@ app.use('/api/auth/leaves', leaveRoutes);
 
 
 app.use('/api/calendar', calendarRoutes);
+
+
+
 // ✅ Global Error Handler
 app.use((err, req, res, next) => {
   console.error('Server Error:', err);

@@ -1,60 +1,54 @@
-const CalendarDay = require('../models/CalendarDay');
+const CalendarEntry = require('../models/calendarModel');
 
-// Get all days for a year
-exports.getCalendarByYear = async (req, res) => {
-  const { year } = req.params;
+// Create
+exports.createEntry = async (req, res) => {
   try {
-    const days = await CalendarDay.find({ year });
-    res.json(days);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching calendar data', error });
+    const entry = await CalendarEntry.create(req.body);
+    res.status(201).json(entry);
+  } catch (err) {
+    console.error("Create Error:", err);
+    res.status(400).json({ error: err.message });
   }
 };
 
-// Add a new day or override existing
-exports.addOrUpdateDay = async (req, res) => {
-  const { date, dayOfWeek, type, description, year } = req.body;
-
+// Read all or by date
+exports.getEntries = async (req, res) => {
   try {
-    const updated = await CalendarDay.findOneAndUpdate(
-      { date },
-      { date, dayOfWeek, type, description, year },
-      { upsert: true, new: true }
-    );
+    const { date } = req.query;
+    let query = {};
+
+    if (date) {
+      const dayStart = new Date(date);
+      const dayEnd = new Date(date);
+      dayEnd.setHours(23, 59, 59, 999);
+      query.date = { $gte: dayStart, $lte: dayEnd };
+    }
+
+    const entries = await CalendarEntry.find(query);
+    res.json(entries);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Update
+exports.updateEntry = async (req, res) => {
+  try {
+    const updated = await CalendarEntry.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updated) return res.status(404).json({ error: 'Entry not found' });
     res.json(updated);
-  } catch (error) {
-    res.status(500).json({ message: 'Error saving calendar day', error });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 };
 
-// Delete a specific day
-exports.deleteDay = async (req, res) => {
-  const { id } = req.params;
+// Delete
+exports.deleteEntry = async (req, res) => {
   try {
-    await CalendarDay.findByIdAndDelete(id);
-    res.json({ message: 'Day deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error deleting day', error });
-  }
-};
-
-
-
-// GET calendar days by year and month
-exports.getCalendarByMonth = async (req, res) => {
-  const { year, month } = req.params;
-
-  try {
-    const startDate = new Date(`${year}-${month}-01`);
-    const endDate = new Date(`${year}-${month}-31`);
-
-    const days = await CalendarDay.find({
-      date: { $gte: startDate, $lte: endDate },
-      year: parseInt(year)
-    });
-
-    res.json(days);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching month data', error });
+    const deleted = await CalendarEntry.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'Entry not found' });
+    res.json({ message: 'Entry deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };

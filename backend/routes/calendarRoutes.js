@@ -2,10 +2,9 @@ const express = require('express');
 const router = express.Router();
 const calendarController = require('../controllers/calendarController');
 
-
-router.get('/:year/:month', calendarController.getCalendarByMonth); // <-- New route
-router.get('/:year', calendarController.getCalendarByYear);
-router.post('/', calendarController.addOrUpdateDay);
-router.delete('/:id', calendarController.deleteDay);
+router.post('/', calendarController.createEntry);
+router.get('/', calendarController.getEntries);
+router.put('/:id', calendarController.updateEntry);
+router.delete('/:id', calendarController.deleteEntry);
 
 module.exports = router;
