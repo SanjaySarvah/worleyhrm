@@ -1,0 +1,13 @@
+.topbar {
+  z-index: 1050;
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+}
+
+.topbar img {
+  transition: transform 0.2s ease;
+}
+.topbar img:hover {
+  transform: scale(1.05);
+}

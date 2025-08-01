@@ -1,40 +1,56 @@
 require('dotenv').config();
 const express = require('express');
+const http = require('http');
 const cors = require('cors');
 const path = require('path');
 const connectDB = require('./config/db');
+
+// ⬇️ ROUTES
 const calendarRoutes = require('./routes/calendarRoutes');
 const leaveRoutes = require('./routes/leaveRoutes');
+const authRoutes = require('./routes/authRoutes');
+const formRoutes = require('./routes/form.routes');
+const announcementRoutes = require('./routes/announcementRoutes'); // ✅ NEW
 
+// ✅ INIT
 const app = express();
-const PORT = process.env.PORT || 5000;
+const server = http.createServer(app);
+const { Server } = require('socket.io');
 
-// ✅ Connect to DB
+// ✅ SOCKET.IO CONFIG
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:5173', // your Vite frontend
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+  },
+});
+
+// ✅ Connect DB
 connectDB();
 
-// ✅ Enable CORS for frontend (adjust for your actual frontend origin)
+// ✅ CORS
 app.use(cors({
-  origin: 'http://localhost:5173', // frontend running on Vite
-  credentials: true, // only needed if using cookies or authorization headers
+  origin: 'http://localhost:5173',
+  credentials: true,
 }));
 
-// ✅ Parse JSON request bodies
+// ✅ Middleware
 app.use(express.json());
-
-// ✅ Serve uploaded files statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// ✅ Existing Routes
-app.use('/api/auth', require('./routes/authRoutes'));
+// ✅ Make io accessible in routes/controllers
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
 
-// ✅ New Form Routes
-app.use('/api/forms', require('./routes/form.routes'));
+// ✅ ROUTES
+app.use('/api/auth', authRoutes);
+app.use('/api/forms', formRoutes);
 app.use('/api/auth/leaves', leaveRoutes);
-
-
 app.use('/api/calendar', calendarRoutes);
-
-
+app.use('/api/announcements', announcementRoutes); // ✅ NEW
 
 // ✅ Global Error Handler
 app.use((err, req, res, next) => {
@@ -42,7 +58,17 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: err.message || 'Internal Server Error' });
 });
 
+// ✅ WebSocket Events
+io.on('connection', (socket) => {
+  console.log('Client connected:', socket.id);
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+  });
+});
+
 // ✅ Start server
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
 });

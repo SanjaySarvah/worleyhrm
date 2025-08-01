@@ -59,6 +59,7 @@ import LeaveForm from '../pages/LeaveForm';
 import ProfileUpdate from '../pages/ProfileUpdate';
 import CalendarManager from '../pages/CalendarManager';
 import ViewProfile from '../pages/ViewProfile';
+import ANnoncementManager from '../components/AnnouncementManager';
 const roleRoutes = {
   admin: [
     { path: '/admin', element: <AdminDashboard /> },
@@ -67,6 +68,7 @@ const roleRoutes = {
       { path: '/admin/ProfileUpdate', element: <ProfileUpdate /> },
          { path: '/admin/CalendarManager', element: <CalendarManager /> },
            { path: '/admin/ViewProfile', element: <ViewProfile /> },
+            { path: '/admin/ANnoncementManager', element: <ANnoncementManager /> },
      
   ],
   hr: [

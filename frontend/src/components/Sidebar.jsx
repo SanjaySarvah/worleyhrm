@@ -42,7 +42,8 @@ const Sidebar = () => {
             {link('/admin/leave-status', 'Leave Status', 'bi-list-check')}
             {link('/admin/ProfileUpdate', 'Profile Update', 'bi-list-check')}
             {link('/admin/CalendarManager', 'Calendar Manager', 'bi-list-check')}
-            {link('/admin/ViewProfile', 'My Profile', 'bi-list-check')}
+            {/* {link('/admin/ViewProfile', 'My Profile', 'bi-list-check')} */}
+            {link('/admin/ANnoncementManager', 'Annoncement', 'bi-list-check')}
           </>
         );
       case 'hr':
