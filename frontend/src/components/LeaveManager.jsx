@@ -1,133 +1,142 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/calendar';
-
-const initialFormState = {
-  date: '',
-  title: '',
-  description: '',
-  type: 'custom'
-};
+const BASE_URL = 'http://localhost:5000/api/calendar';
 
 const CalendarManager = () => {
-  const [formData, setFormData] = useState(initialFormState);
-  const [entries, setEntries] = useState([]);
-  const [editingId, setEditingId] = useState(null);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [calendarData, setCalendarData] = useState(null);
+  const [newEntry, setNewEntry] = useState({ title: '', description: '', type: 'custom' });
+
+  // Fetch entries for selected date
+  const fetchCalendar = async () => {
+    if (!selectedDate) return;
+    try {
+      const res = await axios.get(`${BASE_URL}?date=${selectedDate}`);
+      setCalendarData(res.data || { entries: [] });
+    } catch (err) {
+      console.error('Error fetching data:', err);
+    }
+  };
+
+  // Add new entry
+  const handleAddEntry = async () => {
+    if (!newEntry.title || !selectedDate) return alert('Date and title are required.');
+    try {
+      await axios.post(BASE_URL, { date: selectedDate, ...newEntry });
+      setNewEntry({ title: '', description: '', type: 'custom' });
+      fetchCalendar();
+    } catch (err) {
+      console.error('Error adding entry:', err);
+    }
+  };
+
+  // Update existing entry
+  const handleUpdateEntry = async (index) => {
+    const title = prompt('New title:', calendarData.entries[index].title);
+    if (!title) return;
+
+    try {
+      await axios.put(`${BASE_URL}/${selectedDate}`, {
+        index,
+        ...calendarData.entries[index],
+        title,
+      });
+      fetchCalendar();
+    } catch (err) {
+      console.error('Error updating entry:', err);
+    }
+  };
+
+  // Delete entry
+  const handleDeleteEntry = async (index) => {
+    if (!window.confirm('Are you sure you want to delete this entry?')) return;
+    try {
+      await axios.delete(`${BASE_URL}/${selectedDate}`, {
+        data: { index },
+      });
+      fetchCalendar();
+    } catch (err) {
+      console.error('Error deleting entry:', err);
+    }
+  };
 
   useEffect(() => {
-    fetchEntries();
-  }, []);
-
-  const fetchEntries = async () => {
-    try {
-      const res = await axios.get(API_URL);
-      setEntries(res.data);
-    } catch (err) {
-      console.error('Error fetching entries:', err);
+    if (selectedDate) {
+      fetchCalendar();
     }
-  };
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      if (editingId) {
-        await axios.put(`${API_URL}/${editingId}`, formData);
-      } else {
-        await axios.post(API_URL, formData);
-      }
-      setFormData(initialFormState);
-      setEditingId(null);
-      fetchEntries();
-    } catch (err) {
-      console.error('Submit error:', err);
-    }
-  };
-
-  const handleEdit = (entry) => {
-    setFormData({
-      date: entry.date.split('T')[0],
-      title: entry.title,
-      description: entry.description,
-      type: entry.type
-    });
-    setEditingId(entry._id);
-  };
+  }, [selectedDate]);
 
   return (
-    <div className="container my-5">
-      <div className="card shadow-sm">
-        <div className="card-header bg-primary text-white">
-          <h4 className="mb-0">{editingId ? 'Update Calendar Entry' : 'Add New Calendar Entry'}</h4>
-        </div>
-        <div className="card-body">
-          <form onSubmit={handleSubmit} className="row g-3">
-            <div className="col-md-4">
-              <label className="form-label">Date</label>
-              <input type="date" name="date" className="form-control" value={formData.date} onChange={handleChange} required />
-            </div>
-            <div className="col-md-4">
-              <label className="form-label">Title</label>
-              <input type="text" name="title" className="form-control" value={formData.title} onChange={handleChange} required />
-            </div>
-            <div className="col-md-4">
-              <label className="form-label">Type</label>
-              <select name="type" className="form-select" value={formData.type} onChange={handleChange}>
-                <option value="holiday">Holiday</option>
-                <option value="event">Event</option>
-                <option value="reminder">Reminder</option>
-                <option value="custom">Custom</option>
-              </select>
-            </div>
-            <div className="col-12">
-              <label className="form-label">Description</label>
-              <textarea name="description" className="form-control" rows="2" value={formData.description} onChange={handleChange} />
-            </div>
-            <div className="col-12 d-flex justify-content-end">
-              <button type="submit" className="btn btn-success">{editingId ? 'Update Entry' : 'Add Entry'}</button>
-            </div>
-          </form>
-        </div>
+    <div className="container mt-4">
+      <h3>📅 Calendar Manager</h3>
+
+      {/* Date Picker */}
+      <div className="mb-3">
+        <label>Select Date:</label>
+        <input
+          type="date"
+          className="form-control"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+        />
       </div>
 
-      <div className="mt-5">
-        <h4>All Calendar Entries</h4>
-        <div className="table-responsive">
-          <table className="table table-bordered table-striped mt-3">
-            <thead className="table-dark">
-              <tr>
-                <th>Date</th>
-                <th>Title</th>
-                <th>Type</th>
-                <th>Description</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {entries.map(entry => (
-                <tr key={entry._id}>
-                  <td>{entry.date.split('T')[0]}</td>
-                  <td>{entry.title}</td>
-                  <td><span className="badge bg-secondary text-capitalize">{entry.type}</span></td>
-                  <td>{entry.description}</td>
-                  <td>
-                    <button className="btn btn-sm btn-primary" onClick={() => handleEdit(entry)}>Edit</button>
-                  </td>
-                </tr>
-              ))}
-              {entries.length === 0 && (
-                <tr>
-                  <td colSpan="5" className="text-center">No entries found.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      {/* Add Entry Form */}
+      <div className="card p-3 mb-3">
+        <h5>Add Entry</h5>
+        <input
+          type="text"
+          className="form-control mb-2"
+          placeholder="Title"
+          value={newEntry.title}
+          onChange={(e) => setNewEntry({ ...newEntry, title: e.target.value })}
+        />
+        <input
+          type="text"
+          className="form-control mb-2"
+          placeholder="Description"
+          value={newEntry.description}
+          onChange={(e) => setNewEntry({ ...newEntry, description: e.target.value })}
+        />
+        <select
+          className="form-select mb-2"
+          value={newEntry.type}
+          onChange={(e) => setNewEntry({ ...newEntry, type: e.target.value })}
+        >
+          <option value="custom">Custom</option>
+          <option value="event">Event</option>
+          <option value="holiday">Holiday</option>
+          <option value="reminder">Reminder</option>
+        </select>
+        <button className="btn btn-primary" onClick={handleAddEntry}>Add Entry</button>
       </div>
+
+      {/* List of Entries */}
+      {calendarData?.entries?.length > 0 ? (
+        <div>
+          <h5>Entries for {selectedDate}</h5>
+          <ul className="list-group">
+            {calendarData.entries.map((entry, index) => (
+              <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>{entry.title}</strong> ({entry.type}) - {entry.description}
+                </div>
+                <div>
+                  <button className="btn btn-sm btn-warning me-2" onClick={() => handleUpdateEntry(index)}>
+                    Edit
+                  </button>
+                  <button className="btn btn-sm btn-danger" onClick={() => handleDeleteEntry(index)}>
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        selectedDate && <p>No entries for this date.</p>
+      )}
     </div>
   );
 };

@@ -1,2 +1,4 @@
-const StaffDashboard = () => <h2>Staff Dashboard</h2>;
+import ViewProfile from "../ViewProfile";
+
+const StaffDashboard = () => <ViewProfile/>;
 export default StaffDashboard;

@@ -84,6 +84,7 @@ const roleRoutes = {
     { path: '/staff/leave-status', element: <LeaveStatus /> },
        { path: '/staff/LeaveForm', element: <LeaveForm /> },
        { path: '/staff/ProfileUpdate', element: <ProfileUpdate /> },
+        { path: '/staff/ViewProfile', element: <ViewProfile /> },
   ],
 };
 

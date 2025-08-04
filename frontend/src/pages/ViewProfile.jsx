@@ -5,6 +5,7 @@ import ViewWorkingDetails from "../components/ViewProfile/ViewWorkingDetails";
 import ViewBankDetails from "../components/ViewProfile/ViewBankDetails";
 import ViewDocuments from "../components/ViewProfile/ViewDocuments";
 import { FaEdit } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const FALLBACK_AVATAR = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
 
@@ -55,7 +56,7 @@ const ProfileAvatar = () => {
         method: "PATCH",
         body: formData,
       });
-      fetchImage(); // refresh preview after upload
+      fetchImage();
     } catch (err) {
       console.error("Upload failed", err);
     }
@@ -134,6 +135,8 @@ const tabs = [
 const ViewProfile = () => {
   const [activeTab, setActiveTab] = useState(tabs[0].id);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [rolePath, setRolePath] = useState("/profileupdate");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -141,15 +144,32 @@ const ViewProfile = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem("user"));
+    if (userData?.role) {
+      const role = userData.role.toLowerCase();
+      if (["admin", "hr", "staff"].includes(role)) {
+        setRolePath(`/${role}/ProfileUpdate`);
+      }
+    }
+  }, []);
+
   return (
     <div style={styles.container}>
       <div style={styles.leftColumn}>
         <ProfileAvatar />
       </div>
-      <div style={styles.rightColumn}>
-        <h2 style={styles.header}>Employee Profile</h2>
 
-        {/* Tab Navigation */}
+      <div style={styles.rightColumn}>
+        <div style={styles.headerRow}>
+             <h2 style={styles.header}>Employee Profile</h2>
+          <button style={styles.editButton} onClick={() => navigate(rolePath)}>
+            <FaEdit style={{ marginRight: "6px" }} />
+            Edit Profile
+          </button>
+       
+        </div>
+
         {isMobile ? (
           <select
             value={activeTab}
@@ -179,7 +199,6 @@ const ViewProfile = () => {
           </div>
         )}
 
-        {/* Tab Content */}
         <div style={styles.tabContent}>
           {tabs.find((tab) => tab.id === activeTab)?.content}
         </div>
@@ -188,9 +207,6 @@ const ViewProfile = () => {
   );
 };
 
-export default ViewProfile;
-
-// Layout & Style
 const styles = {
   container: {
     display: "flex",
@@ -199,60 +215,70 @@ const styles = {
     gap: "20px",
   },
   leftColumn: {
-    flex: "1 1 30%",
+    flex: "1 1 250px",
     maxWidth: "300px",
-    padding: "10px",
-    borderRight: "1px solid #eee",
-    minWidth: "250px",
   },
   rightColumn: {
-    flex: "1 1 70%",
-    padding: "10px",
-    minWidth: "300px",
+    flex: "2 1 600px",
+  },
+  headerRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "20px",
   },
   header: {
-    marginBottom: "20px",
-    fontSize: "22px",
-    color: "#333",
+    fontSize: "24px",
+    fontWeight: "bold",
+  },
+  editButton: {
+    backgroundColor: "#007bff",
+    color: "#fff",
+    border: "none",
+    padding: "8px 14px",
+    borderRadius: "5px",
+    fontSize: "14px",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
   },
   tabButtons: {
     display: "flex",
     flexWrap: "wrap",
     gap: "10px",
-    marginBottom: "15px",
+    marginBottom: "20px",
   },
   tabButton: {
-    padding: "10px 15px",
-    border: "1px solid #ccc",
-    backgroundColor: "#f9f9f9",
+    padding: "10px 16px",
+    backgroundColor: "#eee",
+    border: "none",
     borderRadius: "5px",
     cursor: "pointer",
   },
   activeTab: {
     backgroundColor: "#007bff",
     color: "#fff",
-    borderColor: "#007bff",
+  },
+  tabContent: {
+    padding: "10px",
+    border: "1px solid #ddd",
+    borderRadius: "5px",
+    backgroundColor: "#fff",
   },
   select: {
-    width: "100%",
     padding: "10px",
     borderRadius: "5px",
     border: "1px solid #ccc",
-    marginBottom: "10px",
-  },
-  tabContent: {
-    marginTop: "10px",
-    border: "1px solid #ddd",
-    padding: "15px",
-    borderRadius: "8px",
-    backgroundColor: "#fefefe",
+    marginBottom: "20px",
   },
   userInfoBox: {
-    marginTop: "15px",
+    marginTop: "20px",
     textAlign: "left",
   },
   userLine: {
-    margin: "4px 0",
-    color: "#444",
+    margin: "6px 0",
+    fontSize: "14px",
   },
 };
+
+export default ViewProfile;

@@ -1,233 +1,211 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
-const API_URL = 'http://localhost:5000/api/auth/leaves';
+const StaffLeave = () => {
+  const [showForm, setShowForm] = useState(false);
+  const [leaveType, setLeaveType] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [reason, setReason] = useState('');
+  const [leaves, setLeaves] = useState([]);
 
-const StaffLeaveDashboard = () => {
-  const [form, setForm] = useState({
-    leaveType: '',
-    fromDate: '',
-    toDate: '',
-    reason: ''
-  });
-
-  const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [filterMonth, setFilterMonth] = useState('');
-  const [filterFrom, setFilterFrom] = useState('');
-  const [filterTo, setFilterTo] = useState('');
-
-  const user = JSON.parse(localStorage.getItem('user'));
-
-  const fetchLeaveHistory = async () => {
-    try {
-      const res = await axios.get(`${API_URL}/myleaves/${user.id}`);
-      const sorted = res.data.sort((a, b) => new Date(b.fromDate) - new Date(a.fromDate));
-      setHistory(sorted || []);
-    } catch (err) {
-      toast.error('Error fetching leave history');
-    }
-  };
+  const token = localStorage.getItem('token');
+  const leaveTypes = ['Sick Leave', 'Casual Leave', 'Paid Leave', 'Half Day', 'Work From Home'];
 
   useEffect(() => {
-    fetchLeaveHistory();
+    fetchMyLeaves();
   }, []);
 
-  const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const fetchMyLeaves = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/auth/leaves/myleaves', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setLeaves(response.data);
+    } catch (err) {
+      console.error('Error fetching leaves:', err);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { leaveType, fromDate, toDate, reason } = form;
-
     if (!leaveType || !fromDate || !toDate || !reason) {
-      toast.warning('Please fill in all fields');
-      return;
-    }
-
-    const hasPending = history.some((h) => h.status === 'pending');
-    if (hasPending) {
-      toast.warn('You have a pending leave request. Please wait for approval.');
+      alert('Please fill all fields');
       return;
     }
 
     try {
-      setLoading(true);
-      await axios.post(`${API_URL}/apply`, {
-        ...form,
-        userId: user.id
-      });
-      toast.success('✅ Leave applied successfully!');
-      setForm({ leaveType: '', fromDate: '', toDate: '', reason: '' });
-      fetchLeaveHistory();
+      await axios.post(
+        'http://localhost:5000/api/auth/leaves/apply',
+        { leaveType, fromDate, toDate, reason },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      alert('Leave request submitted!');
+      setShowForm(false);
+      setLeaveType('');
+      setFromDate('');
+      setToDate('');
+      setReason('');
+      fetchMyLeaves();
     } catch (err) {
-      toast.error(err.response?.data?.msg || '❌ Error applying leave');
-    } finally {
-      setLoading(false);
+      console.error('Error applying leave:', err);
+      alert('Error applying leave');
     }
   };
 
-  const filteredHistory = history.filter((leave) => {
-    const leaveMonth = new Date(leave.fromDate).toISOString().slice(0, 7);
-    const leaveDate = new Date(leave.fromDate);
-    const fromDateFilter = filterFrom ? new Date(filterFrom) : null;
-    const toDateFilter = filterTo ? new Date(filterTo) : null;
-
-    return (
-      (!filterMonth || leaveMonth === filterMonth) &&
-      (!fromDateFilter || leaveDate >= fromDateFilter) &&
-      (!toDateFilter || leaveDate <= toDateFilter)
-    );
-  });
+  const groupedLeaves = leaves.reduce((acc, leave) => {
+    const date = new Date(leave.fromDate);
+    const monthYear = `${date.toLocaleString('default', { month: 'long' })} ${date.getFullYear()}`;
+    if (!acc[monthYear]) acc[monthYear] = [];
+    acc[monthYear].push(leave);
+    return acc;
+  }, {});
 
   return (
-    <div className="container mt-4">
-      <ToastContainer />
-      <h3 className="mb-4">📝 Staff Leave Application</h3>
+    <div style={{ padding: '30px', maxWidth: '800px', margin: '0 auto', fontFamily: 'sans-serif' }}>
+      <h2 style={{ marginBottom: '20px' }}>📅 Leave Management</h2>
 
-      {/* Leave Form */}
-      <form onSubmit={handleSubmit} className="border p-4 rounded shadow-sm bg-light mb-4">
-        <div className="row mb-3">
-          <div className="col-md-3">
-            <label className="form-label">Leave Type</label>
-            <select
-              name="leaveType"
-              value={form.leaveType}
-              onChange={handleChange}
-              className="form-select"
-              required
-            >
-              <option value="">Select</option>
-              <option value="casual">Casual</option>
-              <option value="sick">Sick</option>
-              <option value="earned">Earned</option>
-              <option value="unpaid">Unpaid</option>
+      <button
+        onClick={() => setShowForm(!showForm)}
+        style={{
+          backgroundColor: '#007bff',
+          color: '#fff',
+          border: 'none',
+          padding: '10px 20px',
+          borderRadius: '6px',
+          cursor: 'pointer',
+          marginBottom: '20px'
+        }}
+      >
+        {showForm ? 'Cancel' : 'Ask Leave Permission'}
+      </button>
+
+      {showForm && (
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            backgroundColor: '#f9f9f9',
+            padding: '25px',
+            borderRadius: '8px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            marginBottom: '30px'
+          }}
+        >
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px' }}>Leave Type</label>
+            <select value={leaveType} onChange={(e) => setLeaveType(e.target.value)} required style={{ width: '100%', padding: '8px' }}>
+              <option value="">Select Type</option>
+              {leaveTypes.map((type) => (
+                <option key={type} value={type}>{type}</option>
+              ))}
             </select>
           </div>
-          <div className="col-md-3">
-            <label className="form-label">From</label>
-            <input
-              type="date"
-              name="fromDate"
-              value={form.fromDate}
-              onChange={handleChange}
-              className="form-control"
-              required
-            />
-          </div>
-          <div className="col-md-3">
-            <label className="form-label">To</label>
-            <input
-              type="date"
-              name="toDate"
-              value={form.toDate}
-              onChange={handleChange}
-              className="form-control"
-              required
-            />
-          </div>
-          <div className="col-md-3">
-            <label className="form-label">Reason</label>
-            <textarea
-              name="reason"
-              value={form.reason}
-              onChange={handleChange}
-              className="form-control"
-              placeholder="Reason for leave"
-              rows="2"
-              maxLength={200}
-              required
-            />
-            <small className="text-muted">Max 200 characters</small>
-          </div>
-        </div>
-        <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? 'Submitting...' : 'Apply Leave'}
-        </button>
-      </form>
 
-      {/* Filters */}
-      <div className="row mb-4">
-        <div className="col-md-4">
-          <label className="form-label">📆 Filter by Month</label>
-          <input
-            type="month"
-            className="form-control"
-            value={filterMonth}
-            onChange={(e) => setFilterMonth(e.target.value)}
-          />
-        </div>
-        <div className="col-md-4">
-          <label className="form-label">From Date</label>
-          <input
-            type="date"
-            className="form-control"
-            value={filterFrom}
-            onChange={(e) => setFilterFrom(e.target.value)}
-          />
-        </div>
-        <div className="col-md-4">
-          <label className="form-label">To Date</label>
-          <input
-            type="date"
-            className="form-control"
-            value={filterTo}
-            onChange={(e) => setFilterTo(e.target.value)}
-          />
-        </div>
-      </div>
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px' }}>From Date</label>
+            <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} required style={{ width: '100%', padding: '8px' }} />
+          </div>
 
-      {/* Leave History Table */}
-      <h5 className="mb-3">📋 My Leave History</h5>
-      <div className="table-responsive">
-        <table className="table table-bordered table-hover align-middle">
-          <thead className="table-dark">
-            <tr>
-              <th>Leave Type</th>
-              <th>From</th>
-              <th>To</th>
-              <th>Reason</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredHistory.length > 0 ? (
-              filteredHistory.map((leave) => (
-                <tr key={leave._id}>
-                  <td>{leave.leaveType}</td>
-                  <td>{new Date(leave.fromDate).toLocaleDateString()}</td>
-                  <td>{new Date(leave.toDate).toLocaleDateString()}</td>
-                  <td>{leave.reason}</td>
-                  <td>
-                    <span
-                      className={`badge rounded-pill px-3 py-2 ${
-                        leave.status === 'approved'
-                          ? 'bg-success'
-                          : leave.status === 'rejected'
-                          ? 'bg-danger'
-                          : 'bg-warning text-dark'
-                      }`}
-                    >
-                      {leave.status.toUpperCase()}
-                    </span>
-                  </td>
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px' }}>To Date</label>
+            <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} required style={{ width: '100%', padding: '8px' }} />
+          </div>
+
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '5px' }}>Reason</label>
+            <textarea value={reason} onChange={(e) => setReason(e.target.value)} required style={{ width: '100%', padding: '8px' }} />
+          </div>
+
+          <button
+            type="submit"
+            style={{
+              backgroundColor: '#28a745',
+              color: '#fff',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '6px',
+              cursor: 'pointer'
+            }}
+          >
+            Submit Leave
+          </button>
+        </form>
+      )}
+
+      <h3 style={{ marginBottom: '15px' }}>📋 My Leave History</h3>
+      {Object.keys(groupedLeaves).length === 0 ? (
+        <p>No leaves applied yet.</p>
+      ) : (
+        Object.entries(groupedLeaves).map(([monthYear, entries]) => (
+          <div key={monthYear} style={{ marginBottom: '25px' }}>
+            <h4 style={{ color: '#555', borderBottom: '1px solid #ddd', paddingBottom: '5px' }}>{monthYear}</h4>
+            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
+              <thead>
+                <tr style={{ backgroundColor: '#f0f0f0' }}>
+                  <th style={thStyle}>Type</th>
+                  <th style={thStyle}>From</th>
+                  <th style={thStyle}>To</th>
+                  <th style={thStyle}>Reason</th>
+                  <th style={thStyle}>Status</th>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="6" className="text-center text-muted">
-                  No leave history found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {entries.map((leave) => (
+                  <tr key={leave._id} style={{ textAlign: 'center' }}>
+                    <td style={tdStyle}>{leave.leaveType}</td>
+                    <td style={tdStyle}>{new Date(leave.fromDate).toLocaleDateString()}</td>
+                    <td style={tdStyle}>{new Date(leave.toDate).toLocaleDateString()}</td>
+                    <td style={tdStyle}>{leave.reason}</td>
+                    <td style={{ ...tdStyle }}>
+                      <span
+                        style={{
+                          padding: '4px 10px',
+                          borderRadius: '15px',
+                          backgroundColor:
+                            leave.status === 'approved'
+                              ? '#d4edda'
+                              : leave.status === 'rejected'
+                              ? '#f8d7da'
+                              : '#fff3cd',
+                          color:
+                            leave.status === 'approved'
+                              ? '#155724'
+                              : leave.status === 'rejected'
+                              ? '#721c24'
+                              : '#856404',
+                          fontWeight: 600
+                        }}
+                      >
+                        {leave.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))
+      )}
     </div>
   );
 };
 
-export default StaffLeaveDashboard;
+const thStyle = {
+  padding: '10px',
+  border: '1px solid #ddd',
+  backgroundColor: '#f8f9fa',
+  textAlign: 'center'
+};
+
+const tdStyle = {
+  padding: '10px',
+  border: '1px solid #ddd'
+};
+
+export default StaffLeave;

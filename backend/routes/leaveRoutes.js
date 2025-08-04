@@ -1,17 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const leaveController = require('../controllers/leaveController');
+const { protect } = require('../middleware/authMiddleware');
 
-// POST - apply leave
-router.post('/apply', leaveController.applyLeave);
+// STAFF: Apply leave
+router.post('/apply', protect(['staff', 'hr', 'admin']), leaveController.applyLeave);
 
-// GET - personal leaves
-router.get('/myleaves/:userId', leaveController.getMyLeaves);
+// STAFF: Get my leaves
+router.get('/myleaves', protect(['staff', 'hr', 'admin']), leaveController.getMyLeaves);
 
-// GET - all leaves
-router.get('/all', leaveController.getAllLeaves);
+// HR/Admin: Get all leaves
+router.get('/all', protect(['hr', 'admin']), leaveController.getAllLeaves);
 
-// PATCH - update leave status
-router.patch('/status/:leaveId', leaveController.updateLeaveStatus);
+// HR/Admin: Update leave status
+router.patch('/status/:leaveId', protect(['hr', 'admin']), leaveController.updateLeaveStatus);
 
 module.exports = router;

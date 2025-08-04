@@ -37,32 +37,31 @@ const Sidebar = () => {
       case 'admin':
         return (
           <>
-            {link('/admin', 'Admin Dashboard', 'bi-speedometer2')}
-            {link('/admin/create-employee', 'Employee Creation', 'bi-person-plus-fill')}
-            {link('/admin/leave-status', 'Leave Status', 'bi-list-check')}
-            {link('/admin/ProfileUpdate', 'Profile Update', 'bi-list-check')}
-            {link('/admin/CalendarManager', 'Calendar Manager', 'bi-list-check')}
-            {/* {link('/admin/ViewProfile', 'My Profile', 'bi-list-check')} */}
-            {link('/admin/ANnoncementManager', 'Annoncement', 'bi-list-check')}
-             {link('/admin/SalarySheetManager', 'Salary Updation', 'bi-list-check')}
-              {link('/admin/ProductOrder', 'ProductSample', 'bi-list-check')}
+              {link('/admin', 'Admin Dashboard', 'bi-speedometer2')}
+          {link('/admin/create-employee', 'Employee Creation', 'bi-person-plus-fill')}
+          {link('/admin/leave-status', 'Leave Status', 'bi-calendar-check')}
+          {link('/admin/ProfileUpdate', 'Profile Update', 'bi-person-lines-fill')}
+          {link('/admin/CalendarManager', 'Calendar Manager', 'bi-calendar3')}
+          {link('/admin/ANnoncementManager', 'Annoncement', 'bi-megaphone-fill')}
+          {link('/admin/SalarySheetManager', 'Salary Updation', 'bi-cash-coin')}
+          {link('/admin/ProductOrder', 'ProductSample', 'bi-box-seam')}
           </>
         );
       case 'hr':
         return (
           <>
-            {link('/hr', 'HR Dashboard', 'bi-briefcase')}
-            {link('/hr/leave-status', 'Leave Status', 'bi-list-check')}
+             {link('/hr', 'HR Dashboard', 'bi-briefcase')}
+          {link('/hr/leave-status', 'Leave Status', 'bi-calendar-check')}
           </>
         );
       case 'staff':
         return (
           <>
-            {link('/staff', 'Staff Dashboard', 'bi-person-workspace')}
-            {link('/staff/leave-status', 'Leave Status', 'bi-list-check')}
-             {link('/staff/LeaveForm', 'Leave Form', 'bi-list-check')}
-             {link('/staff/ProfileUpdate', 'Profile Update', 'bi-list-check')}
-             {link('/admin/ViewProfile', 'My Profile', 'bi-list-check')}
+           {link('/staff', 'MyProfile', 'bi-person-workspace')}
+          {link('/staff/leave-status', 'Leave Status', 'bi-calendar-check')}
+          {link('/staff/LeaveForm', 'Leave Form', 'bi-pencil-square')}
+          {/* {link('/staff/ProfileUpdate', 'Profile Update', 'bi-person-lines-fill')} */}
+         
           </>
         );
       default:

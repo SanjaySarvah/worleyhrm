@@ -1,99 +1,132 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { ToastContainer, toast } from 'react-toastify';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'react-toastify/dist/ReactToastify.css';
 
-const LeaveStatusManager = () => {
+const AdminLeaveManager = () => {
   const [leaves, setLeaves] = useState([]);
-  const [updatingId, setUpdatingId] = useState(null); 
-  const fetchLeaves = async () => {
+  const token = localStorage.getItem('token');
+
+  // Fetch all leave requests
+  const fetchAllLeaves = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/auth/leaves/all');
+      const res = await axios.get('http://localhost:5000/api/auth/leaves/all', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setLeaves(res.data);
     } catch (err) {
-      toast.error('Failed to fetch leaves');
+      console.error('Failed to fetch leave requests:', err);
+      alert('Error fetching leave data');
     }
   };
 
+  // Update leave status
   const handleStatusChange = async (leaveId, newStatus) => {
-    const leave = leaves.find((l) => l._id === leaveId);
-    if (!leave || leave.status === newStatus) return;
-
-    setUpdatingId(leaveId);
     try {
-      await axios.patch(`http://localhost:5000/api/auth/leaves/status/${leaveId}`, {
-        status: newStatus,
-      });
-      toast.success('Leave status updated');
-      fetchLeaves();
+      if (!newStatus) {
+        alert("Please select a status.");
+        return;
+      }
+
+      console.log('Updating leave:', leaveId, 'to status:', newStatus);
+
+      const res = await axios.patch(
+        `http://localhost:5000/api/auth/leaves/status/${leaveId}`,
+        { status: newStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      alert(`Leave status updated to "${newStatus}"`);
+      fetchAllLeaves();
     } catch (err) {
-      toast.error('Failed to update status');
-    } finally {
-      setUpdatingId(null);
+      console.error('Failed to update status:', err.response?.data || err.message);
+      alert('Failed to update status. Check console for more info.');
     }
   };
 
   useEffect(() => {
-    fetchLeaves();
+    fetchAllLeaves();
   }, []);
 
   return (
-    <div className="container mt-4">
-      <ToastContainer />
-      <h3 className="mb-4">Manage Leave Status</h3>
-      <table className="table table-bordered table-hover">
-        <thead className="table-dark">
-          <tr>
-            <th>Employee Name</th>
-            <th>Reason</th>
-            <th>From</th>
-            <th>To</th>
-            <th>Status</th>
-            <th>Change</th>
-          </tr>
-        </thead>
-       <tbody>
-  {leaves.map((leave) => (
-    <tr key={leave._id}>
-      <td>{leave.user?.employeeId || 'N/A'} - {leave.user?.name || 'N/A'}</td>
-      <td>{leave.reason || 'N/A'}</td>
-      <td>{new Date(leave.fromDate).toLocaleDateString() || 'N/A'}</td>
-      <td>{new Date(leave.toDate).toLocaleDateString() || 'N/A'}</td>
-      <td>
-        <span
-          className={`badge ${
-            leave.status === 'Approved'
-              ? 'bg-success'
-              : leave.status === 'Rejected'
-              ? 'bg-danger'
-              : 'bg-warning text-dark'
-          }`}
-        >
-          {leave.status}
-        </span>
-      </td>
-      <td>
-        <select
-          className="form-select"
-          value={leave.status}
-          disabled={updatingId === leave._id}
-          onChange={(e) =>
-            handleStatusChange(leave._id, e.target.value)
-          }
-        >
-          <option value="Pending">Pending</option>
-          <option value="Approved">Approved</option>
-          <option value="Rejected">Rejected</option>
-        </select>
-      </td>
-    </tr>
-  ))}
-</tbody>
+    <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
+      <h2>All Leave Requests</h2>
 
-      </table>
+      {leaves.length === 0 ? (
+        <p>No leave requests found.</p>
+      ) : (
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Type</th>
+              <th>From</th>
+              <th>To</th>
+              <th>Reason</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {leaves.map((leave) => (
+              <tr key={leave._id}>
+                <td>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <img
+                      src={leave.user?.profileImage || 'https://via.placeholder.com/40'}
+                      alt="profile"
+                      width="40"
+                      height="40"
+                      style={{ borderRadius: '50%' }}
+                    />
+                    <div>
+                      <strong>{leave.user?.name}</strong>
+                      <br />
+                      <small>{leave.user?.officeMailId}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>{leave.leaveType}</td>
+                <td>{new Date(leave.fromDate).toLocaleDateString()}</td>
+                <td>{new Date(leave.toDate).toLocaleDateString()}</td>
+                <td>{leave.reason}</td>
+                <td>
+                  <select
+                    value={leave.status}
+                    onChange={(e) => handleStatusChange(leave._id, e.target.value)}
+                    style={{
+                      padding: '6px 10px',
+                      borderRadius: '4px',
+                      backgroundColor:
+                        leave.status === 'approved'
+                          ? '#d4edda'
+                          : leave.status === 'rejected'
+                          ? '#f8d7da'
+                          : '#fff3cd',
+                      color:
+                        leave.status === 'approved'
+                          ? 'green'
+                          : leave.status === 'rejected'
+                          ? 'red'
+                          : 'orange',
+                    }}
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 };
 
-export default LeaveStatusManager;
+export default AdminLeaveManager;
