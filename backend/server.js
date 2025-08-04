@@ -16,6 +16,9 @@ const announcementRoutes = require('./routes/announcementRoutes'); // ✅ NEW
 const app = express();
 const server = http.createServer(app);
 const { Server } = require('socket.io');
+const attendanceRoutes = require('./routes/attendanceRoutes');
+const salarySheetRoutes = require('./routes/salarySheetRoutes');
+
 
 // ✅ SOCKET.IO CONFIG
 const io = new Server(server, {
@@ -57,6 +60,11 @@ app.use((err, req, res, next) => {
   console.error('Server Error:', err);
   res.status(500).json({ message: err.message || 'Internal Server Error' });
 });
+
+
+app.use('/api/attendance', attendanceRoutes);
+
+app.use('/api', salarySheetRoutes);
 
 // ✅ WebSocket Events
 io.on('connection', (socket) => {

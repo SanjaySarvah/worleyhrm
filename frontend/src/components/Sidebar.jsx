@@ -44,6 +44,8 @@ const Sidebar = () => {
             {link('/admin/CalendarManager', 'Calendar Manager', 'bi-list-check')}
             {/* {link('/admin/ViewProfile', 'My Profile', 'bi-list-check')} */}
             {link('/admin/ANnoncementManager', 'Annoncement', 'bi-list-check')}
+             {link('/admin/SalarySheetManager', 'Salary Updation', 'bi-list-check')}
+              {link('/admin/ProductOrder', 'ProductSample', 'bi-list-check')}
           </>
         );
       case 'hr':

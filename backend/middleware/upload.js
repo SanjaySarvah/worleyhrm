@@ -21,9 +21,15 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
   // Accept most docs/images; adjust as needed
-  const allowed = [
-    'image/png', 'image/jpeg', 'image/jpg', 'application/pdf'
-  ];
+const allowed = [
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+  'application/vnd.ms-excel' // .xls
+];
+
   if (!allowed.includes(file.mimetype)) {
     return cb(new Error('Only images and pdfs are allowed'), false);
   }

@@ -60,6 +60,8 @@ import ProfileUpdate from '../pages/ProfileUpdate';
 import CalendarManager from '../pages/CalendarManager';
 import ViewProfile from '../pages/ViewProfile';
 import ANnoncementManager from '../components/AnnouncementManager';
+import SalarySheetManager from '../pages/SalarySheetManager';
+import ProductOrder from '../pages/ProductOrder';
 const roleRoutes = {
   admin: [
     { path: '/admin', element: <AdminDashboard /> },
@@ -69,6 +71,8 @@ const roleRoutes = {
          { path: '/admin/CalendarManager', element: <CalendarManager /> },
            { path: '/admin/ViewProfile', element: <ViewProfile /> },
             { path: '/admin/ANnoncementManager', element: <ANnoncementManager /> },
+              { path: '/admin/SalarySheetManager', element: <SalarySheetManager/> },
+               { path: '/admin/ProductOrder', element: <ProductOrder/> },
      
   ],
   hr: [
