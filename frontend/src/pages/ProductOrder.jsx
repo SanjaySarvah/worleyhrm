@@ -64,7 +64,7 @@ const ProductOrder = () => {
 
   return (
     <div className="container mt-4">
-      <h4 className="mb-3">Attendance Monthly Daily History</h4>
+      {/* <h4 className="mb-3">Attendance Monthly Daily History</h4>
       <Form className="mb-3 d-flex gap-2">
         <Form.Control
           type="number"
@@ -147,7 +147,7 @@ const ProductOrder = () => {
           <Button variant="secondary" onClick={() => setEditDialogOpen(false)}>Cancel</Button>
           <Button variant="primary" onClick={handleUpdate}>Update</Button>
         </Modal.Footer>
-      </Modal>
+      </Modal> */}
       <AttendancePage/>
     </div>
   );
