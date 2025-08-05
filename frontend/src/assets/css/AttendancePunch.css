@@ -1,0 +1,283 @@
+.container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .header {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+    align-items: flex-start;
+  }
+  
+  .header h2 {
+    margin: 0;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .headerIcon {
+    color: #3498db;
+  }
+  
+  .datePicker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 5px;
+  }
+  
+  .datePicker label {
+    font-weight: 500;
+    color: #495057;
+  }
+  
+  .datePicker input {
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .tableContainer {
+    overflow-x: auto;
+    margin: 20px 0;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+  }
+  
+  .attendanceTable {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+  }
+  
+  .attendanceTable th {
+    background-color: #3498db;
+    color: white;
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 500;
+  }
+  
+  .attendanceTable td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+  }
+
+  .attendanceTable tr:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .statusBadge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+  
+  .statusPresent {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  .statusAbsent {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  
+  .statusSelect {
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    font-size: 0.85rem;
+  }
+  
+  .timeInputGroup {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .timeInput {
+    padding: 5px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.85rem;
+  }
+  
+  .timeRange {
+    font-size: 0.85rem;
+    color: #495057;
+  }
+  
+  .na {
+    color: #adb5bd;
+  }
+  
+  .totalHours {
+    font-weight: 500;
+    color: #2c3e50;
+  }
+  
+  .actionButtons {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .editButton, .saveButton, .cancelButton {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+  }
+  
+  .editButton {
+    background-color: #ffc107;
+    color: #212529;
+  }
+  
+  .editButton:hover {
+    background-color: #e0a800;
+  }
+  
+  .saveButton {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .saveButton:hover {
+    background-color: #218838;
+  }
+  
+  .saveButton:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+  
+  .cancelButton {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .cancelButton:hover {
+    background-color: #c82333;
+  }
+  
+  .footer {
+    margin-top: 25px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .submitButton {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+  
+  .submitButton:hover {
+    background-color: #0069d9;
+  }
+  
+  .submitButton:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+  
+  .loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    gap: 15px;
+    color: #6c757d;
+  }
+  
+  .errorMessage {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border: 1px solid #f5c6cb;
+  }
+  
+  .successMessage {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border: 1px solid #c3e6cb;
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .attendanceTable {
+      display: block;
+    }
+  
+    .attendanceTable thead {
+      display: none;
+    }
+  
+    .attendanceTable tr {
+      display: block;
+      margin-bottom: 15px;
+      border: 1px solid #dee2e6;
+      border-radius: 5px;
+    }
+  
+    .attendanceTable td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 15px;
+      text-align: right;
+      border-bottom: 1px solid #dee2e6;
+    }
+  
+    .attendanceTable td:before {
+      content: attr(data-label);
+      font-weight: bold;
+      margin-right: 10px;
+      color: #495057;
+    }
+  
+    .actionButtons {
+      justify-content: flex-end;
+    }
+  
+    .datePicker {
+      flex-direction: column;
+      align-items: flex-start;
+      width: 100%;
+    }
+  
+    .datePicker input {
+      width: 100%;
+    }
+  }

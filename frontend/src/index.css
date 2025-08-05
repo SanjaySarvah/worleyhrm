@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 .tab-head {
   background-color: #1f58c5;
   color: #ffffff;
