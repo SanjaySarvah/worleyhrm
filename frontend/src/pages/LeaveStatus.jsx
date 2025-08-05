@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
+const BASE_URL = 'http://localhost:5000';
+
 const AdminLeaveManager = () => {
   const [leaves, setLeaves] = useState([]);
   const token = localStorage.getItem('token');
@@ -8,7 +10,7 @@ const AdminLeaveManager = () => {
   // Fetch all leave requests
   const fetchAllLeaves = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/auth/leaves/all', {
+      const res = await axios.get(`${BASE_URL}/api/auth/leaves/all`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -31,7 +33,7 @@ const AdminLeaveManager = () => {
       console.log('Updating leave:', leaveId, 'to status:', newStatus);
 
       const res = await axios.patch(
-        `http://localhost:5000/api/auth/leaves/status/${leaveId}`,
+        `${BASE_URL}/api/auth/leaves/status/${leaveId}`,
         { status: newStatus },
         {
           headers: {
@@ -42,10 +44,10 @@ const AdminLeaveManager = () => {
       );
 
       alert(`Leave status updated to "${newStatus}"`);
-      fetchAllLeaves();
+      fetchAllLeaves(); // refresh
     } catch (err) {
       console.error('Failed to update status:', err.response?.data || err.message);
-      alert('Failed to update status. Check console for more info.');
+      alert(`Failed to update status: ${err.response?.data?.message || err.message}`);
     }
   };
 
@@ -62,19 +64,19 @@ const AdminLeaveManager = () => {
       ) : (
         <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
           <thead>
-            <tr>
-              <th>Employee</th>
-              <th>Type</th>
-              <th>From</th>
-              <th>To</th>
-              <th>Reason</th>
-              <th>Status</th>
+            <tr style={{ backgroundColor: '#f1f1f1' }}>
+              <th style={styles.th}>Employee</th>
+              <th style={styles.th}>Type</th>
+              <th style={styles.th}>From</th>
+              <th style={styles.th}>To</th>
+              <th style={styles.th}>Reason</th>
+              <th style={styles.th}>Status</th>
             </tr>
           </thead>
           <tbody>
             {leaves.map((leave) => (
-              <tr key={leave._id}>
-                <td>
+              <tr key={leave._id} style={{ borderBottom: '1px solid #ccc' }}>
+                <td style={styles.td}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <img
                       src={leave.user?.profileImage || 'https://via.placeholder.com/40'}
@@ -90,17 +92,18 @@ const AdminLeaveManager = () => {
                     </div>
                   </div>
                 </td>
-                <td>{leave.leaveType}</td>
-                <td>{new Date(leave.fromDate).toLocaleDateString()}</td>
-                <td>{new Date(leave.toDate).toLocaleDateString()}</td>
-                <td>{leave.reason}</td>
-                <td>
+                <td style={styles.td}>{leave.leaveType}</td>
+                <td style={styles.td}>{new Date(leave.fromDate).toLocaleDateString()}</td>
+                <td style={styles.td}>{new Date(leave.toDate).toLocaleDateString()}</td>
+                <td style={styles.td}>{leave.reason}</td>
+                <td style={styles.td}>
                   <select
                     value={leave.status}
                     onChange={(e) => handleStatusChange(leave._id, e.target.value)}
                     style={{
                       padding: '6px 10px',
                       borderRadius: '4px',
+                      border: '1px solid #ccc',
                       backgroundColor:
                         leave.status === 'approved'
                           ? '#d4edda'
@@ -115,7 +118,7 @@ const AdminLeaveManager = () => {
                           : 'orange',
                     }}
                   >
-                    <option value="pending">Pending</option>
+                  
                     <option value="approved">Approved</option>
                     <option value="rejected">Rejected</option>
                   </select>
@@ -127,6 +130,19 @@ const AdminLeaveManager = () => {
       )}
     </div>
   );
+};
+
+// Styling object
+const styles = {
+  th: {
+    textAlign: 'left',
+    padding: '10px',
+    borderBottom: '2px solid #ccc',
+  },
+  td: {
+    padding: '10px',
+    verticalAlign: 'top',
+  },
 };
 
 export default AdminLeaveManager;
