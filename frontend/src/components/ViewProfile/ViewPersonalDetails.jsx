@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Button, Card, Row, Col, Form } from "react-bootstrap";
+import { Button, Card, Row, Col, Form, Badge, Spinner } from "react-bootstrap";
 import PopupConfirmation from "../Modal/PopupConfirmation";
+import { FaEye, FaEdit, FaUser, FaIdCard, FaHome, FaPhone, FaEnvelope, FaGlobe } from "react-icons/fa";
 
 const ViewPersonalDetails = () => {
   const [formData, setFormData] = useState({});
   const [formId, setFormId] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [previewFile, setPreviewFile] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [error, setError] = useState("");
@@ -17,54 +18,26 @@ const ViewPersonalDetails = () => {
     const id = user?.formId;
     if (!id) {
       setError("Form ID not found in localStorage");
+      setIsLoading(false);
       return;
     }
     setFormId(id);
 
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         const res = await axios.get(`http://localhost:5000/api/forms/${id}`);
         setFormData(res.data?.data?.personalDetails || {});
       } catch (err) {
         console.error(err);
         setError("Failed to fetch personal details");
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchData();
   }, [refreshKey]);
-
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (files && files.length > 0) {
-      setFormData((prev) => ({ ...prev, [name]: files[0] }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
-  };
-
-  // const handleUpdate = async () => {
-  //   if (!formId) return;
-
-  //   const form = new FormData();
-  //   for (const key in formData) {
-  //     if (formData[key]) {
-  //       form.append(key, formData[key]);
-  //     }
-  //   }
-
-  //   try {
-  //     await axios.patch(`http://localhost:5000/api/forms/${formId}/personal`, form, {
-  //       headers: { "Content-Type": "multipart/form-data" },
-  //     });
-  //     setMessage({ text: "Profile Details Updated successfully!", type: "success" });
-  //     setIsEditing(false);
-  //     setRefreshKey((prev) => prev + 1);
-  //   } catch (err) {
-  //     console.error(err);
-  //     setMessage({ text: "Update failed.", type: "danger" });
-  //   }
-  // };
 
   const openPreview = (fileName) => {
     setPreviewFile(`http://localhost:5000/uploads/${fileName}`);
@@ -74,154 +47,138 @@ const ViewPersonalDetails = () => {
 
   const fieldGroups = [
     {
-      title: "Personal Info",
-      icon: "bi-person",
+      title: "Personal Information",
+      icon: <FaUser className="me-2" />,
       fields: [
-        { label: "Name", name: "name" },
-        { label: "Father's Name", name: "fatherName" },
-        { label: "Gender", name: "gender" },
-        { label: "Date of Birth", name: "dob", type: "date" },
-        { label: "Blood Group", name: "bloodGroup" },
-        { label: "Marital Status", name: "maritalStatus" },
-        { label: "Nationality", name: "nationality" },
-        { label: "Aadhaar Number", name: "aadhaarNumber" },
-        { label: "PAN Number", name: "panNumber" },
-        { label: "Passport Number", name: "passportNumber" },
+        { label: "Full Name", name: "name", icon: <FaUser size={14} className="me-2" /> },
+        { label: "Father's Name", name: "fatherName", icon: <FaUser size={14} className="me-2" /> },
+        { label: "Gender", name: "gender", icon: <FaUser size={14} className="me-2" /> },
+        { label: "Date of Birth", name: "dob", type: "date", icon: <FaUser size={14} className="me-2" /> },
+        { label: "Blood Group", name: "bloodGroup", icon: <FaUser size={14} className="me-2" /> },
       ],
     },
-    // {
-    //   title: "Documents Upload",
-    //   icon: "bi-upload",
-    //   fields: [
-    //     { label: "Profile Image", name: "profileImage" },
-    //     { label: "Aadhaar Card", name: "aadhaarCard" },
-    //     { label: "PAN Card", name: "panCard" },
-    //     { label: "Passport", name: "passport" },
-    //   ],
-    // },
+    {
+      title: "Identification",
+      icon: <FaIdCard className="me-2" />,
+      fields: [
+        { label: "Aadhaar Number", name: "aadhaarNumber", icon: <FaIdCard size={14} className="me-2" /> },
+        { label: "PAN Number", name: "panNumber", icon: <FaIdCard size={14} className="me-2" /> },
+        { label: "Passport Number", name: "passportNumber", icon: <FaIdCard size={14} className="me-2" /> },
+      ],
+    },
+    {
+      title: "Contact Information",
+      icon: <FaPhone className="me-2" />,
+      fields: [
+        { label: "Nationality", name: "nationality", icon: <FaGlobe size={14} className="me-2" /> },
+        { label: "Marital Status", name: "maritalStatus", icon: <FaUser size={14} className="me-2" /> },
+      ],
+    },
   ];
 
-  if (error) return <p className="text-danger">{error}</p>;
+  if (isLoading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ height: "300px" }}>
+        <Spinner animation="border" variant="primary" />
+        <span className="ms-3">Loading personal details...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="alert alert-danger mx-3 my-4">
+        <i className="bi bi-exclamation-triangle-fill me-2"></i>
+        {error}
+      </div>
+    );
+  }
 
   return (
-    <div className="container mt-4 mb-5">
+ <div >
       <PopupConfirmation
         show={!!message.text}
         message={message.text}
         type={message.type}
         onClose={() => setMessage({ text: "", type: "" })}
-      />
-  
-      <Card className="shadow-sm border-0">
-        {/* Card Header */}
-        <div className="card-header bg-primary text-white">
-          <h5 className="fw-bold mb-0">
-            <i className="bi bi-person-lines-fill me-2"></i> Profile Details
-          </h5>
-        </div>
-  
-        {/* Card Body */}
-        <Card.Body className="p-4">
-          {/* Section 1: First 3 rows and Profile Image */}
-          <Row>
-            {/* Left: First 3 rows */}
-            <Col lg={12} xs={12}>
-              <Form>
-                {fieldGroups.slice(0, 3).map((group, idx) => (
-                  <Row className="mb-4" key={idx}>
-                    {group.fields.map(({ label, name }) => (
-                      <Col md={4} xs={12} className="mb-3" key={name}>
-                        <Form.Group>
-                          <Form.Label className="fw-semibold">{label}</Form.Label>
-                          <div className="form-control bg-light border">
-                            {formData[name] ? (
-                              name.toLowerCase().includes("card") ||
-                              name.toLowerCase().includes("image") ||
-                              name.toLowerCase().includes("passport") ? (
+      />      
+             
+               
+                <div className="d-flex flex-wrap gap-2 mb-3">
+               
+                  {formData.bloodGroup && (
+                    <Badge bg="danger" className="fs-6">
+                      Blood Group: {formData.bloodGroup}
+                    </Badge>
+                  )}
+                  {formData.maritalStatus && (
+                    <Badge bg="success" className="fs-6">
+                      {formData.maritalStatus}
+                    </Badge>
+                  )}
+                </div>
+                {formData.dob && (
+                  <p className="text-muted mb-2">
+                    <i className="bi bi-calendar me-2"></i>
+                    <span className="fw-semibold">Date of Birth:</span>{" "}
+                    {new Date(formData.dob).toLocaleDateString()}
+                  </p>
+                )}
+       
+      
+      
+
+          {/* Details Sections */}
+          {fieldGroups.map((group, groupIndex) => (
+            <Card key={groupIndex} className="mb-4 border-0 shadow-sm">
+              <Card.Header className="bg-light">
+                <h5 className="mb-0 fw-semibold">
+                  {group.icon}
+                  {group.title}
+                </h5>
+              </Card.Header>
+              <Card.Body>
+                <Row>
+                  {group.fields.map((field, fieldIndex) => (
+                    <Col md={6} key={fieldIndex} >
+                      <div className="d-flex align-items-start">
+                        <div className="me-3 mt-1 text-primary">
+                          {field.icon}
+                        </div>
+                        <div className="flex-grow-1">
+                          <h6 className="fw-semibold mb-1">{field.label}</h6>
+                          <div className="p-2 bg-light rounded">
+                            {formData[field.name] ? (
+                              field.name.toLowerCase().includes("card") ||
+                              field.name.toLowerCase().includes("image") ||
+                              field.name.toLowerCase().includes("passport") ? (
                                 <Button
-                                  variant="primary"
-                                  size="md"
-                                  onClick={() => openPreview(formData[name])}
+                                  variant="outline-primary"
+                                  size="sm"
+                                  onClick={() => openPreview(formData[field.name])}
+                                  className="d-flex align-items-center"
                                 >
-                                  Preview
+                                  <FaEye className="me-1" />
+                                  View Document
                                 </Button>
                               ) : (
-                                <span>{formData[name]}</span>
+                                <span className="text-dark">{formData[field.name]}</span>
                               )
                             ) : (
-                              <span className="text-muted">-</span>
+                              <span className="text-muted">Not provided</span>
                             )}
                           </div>
-                        </Form.Group>
-                      </Col>
-                    ))}
-                  </Row>
-                ))}
-              </Form>
-            </Col>
-  
-            {/* Right: Profile Image + Name/Role */}
-            {/* <Col lg={3} xs={12} className="text-center mt-4 mt-lg-0">
-              {formData.profileImage ? (
-                <>
-                  <img
-                    src={`http://localhost:5000/uploads/${formData.profileImage}`}
-                    alt="Profile"
-                    className="rounded-circle border"
-                    style={{
-                      width: 150,
-                      height: 150,
-                      objectFit: "cover",
-                      border: "4px solid #dee2e6",
-                    }}
-                  />
-                  {formData.name && (
-                    <p className="mt-3 fw-semibold mb-1">Name: {formData.name}</p>
-                  )}
-                  {formData.role && (
-                    <p className="fw-semibold">Role: {formData.role}</p>
-                  )}
-                </>
-              ) : (
-                <div className="text-muted mt-4">No profile image uploaded</div>
-              )}
-            </Col> */}
-          </Row>
-  
-          {/* Section 2: Remaining Form Fields with bordered layout */}
-          <div className="mt-5">
-            {fieldGroups.slice(3).map((group, idx) => (
-              <Row className="mb-4" key={idx}>
-                {group.fields.map(({ label, name }) => (
-                  <Col md={6} xs={12} className="mb-3" key={name}>
-                    <div className="border p-3 rounded bg-light h-100">
-                      <strong className="d-block mb-2">{label}</strong>
-                      {formData[name] ? (
-                        name.toLowerCase().includes("card") ||
-                        name.toLowerCase().includes("image") ||
-                        name.toLowerCase().includes("passport") ? (
-                          <Button
-                            variant="outline-primary"
-                            size="sm"
-                            onClick={() => openPreview(formData[name])}
-                          >
-                            Preview
-                          </Button>
-                        ) : (
-                          <span>{formData[name]}</span>
-                        )
-                      ) : (
-                        <span className="text-muted">-</span>
-                      )}
-                    </div>
-                  </Col>
-                ))}
-              </Row>
-            ))}
-          </div>
-        </Card.Body>
-      </Card>
-  
+                        </div>
+                      </div>
+                    </Col>
+                  ))}
+                </Row>
+              </Card.Body>
+            </Card>
+          ))}
+       
+    
+
       {/* Document Preview Modal */}
       {previewFile && (
         <div
@@ -232,36 +189,45 @@ const ViewPersonalDetails = () => {
           onClick={closePreview}
         >
           <div
-            className="modal-dialog modal-xl"
+            className="modal-dialog modal-xl modal-dialog-centered"
             role="document"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="modal-content">
-              <div className="modal-header">
-                <h4 className="modal-title">Document Preview</h4>
+              <div className="modal-header bg-primary text-white">
+                <h4 className="modal-title">
+                  <FaEye className="me-2" />
+                  Document Preview
+                </h4>
                 <button
                   type="button"
-                  className="btn-close"
+                  className="btn-close btn-close-white"
                   aria-label="Close"
                   onClick={closePreview}
                 ></button>
               </div>
-              <div className="modal-body text-center">
+              <div className="modal-body text-center p-0">
                 {previewFile.endsWith(".pdf") ? (
                   <iframe
                     src={previewFile}
                     width="100%"
                     height="600px"
                     title="Preview"
+                    style={{ border: "none" }}
                   ></iframe>
                 ) : (
                   <img
                     src={previewFile}
                     alt="Preview"
                     className="img-fluid"
-                    style={{ maxHeight: "600px" }}
+                    style={{ maxHeight: "80vh" }}
                   />
                 )}
+              </div>
+              <div className="modal-footer">
+                <Button variant="secondary" onClick={closePreview}>
+                  Close
+                </Button>
               </div>
             </div>
           </div>
@@ -269,11 +235,6 @@ const ViewPersonalDetails = () => {
       )}
     </div>
   );
-
-
-
-
-
 };
 
 export default ViewPersonalDetails;

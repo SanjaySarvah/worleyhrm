@@ -20,10 +20,9 @@ const userSchema = new mongoose.Schema({
     note: { type: String },
     date: { type: Date, default: Date.now }
   }],
-  currentSalary: { type: Number, default: 0 } // Will be auto-calculated
+  currentSalary: { type: Number, default: 0 } 
 }, { timestamps: true });
 
-// 🔐 Hash password before saving
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
 

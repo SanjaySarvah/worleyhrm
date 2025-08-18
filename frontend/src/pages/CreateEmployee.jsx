@@ -4,6 +4,8 @@ import { Table, Button, Modal, Form, Row, Col, Badge, InputGroup } from 'react-b
 import { Trash } from 'react-bootstrap-icons';
 
 import { CSVLink } from 'react-csv';
+const VITE_IMAGE_URL = import.meta.env.VITE_IMAGE_URL;
+const UPLOADS_BASE = `${VITE_IMAGE_URL}/uploads`;
 
 const UserTable = () => {
   const [users, setUsers] = useState([]);
@@ -20,15 +22,15 @@ const UserTable = () => {
   });
   const [increment, setIncrement] = useState({ amount: '', type: '', note: '' });
 
-const fetchUsers = async () => {
-  try {
-    const res = await axios.get(`${import.meta.env.VITE_API_URL}/auth/users`);
-    setUsers(res.data.data);
-    setFilteredUsers(res.data.data);
-  } catch (err) {
-    console.error(err);
-  }
-};
+  const fetchUsers = async () => {
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/auth/users`);
+      setUsers(res.data.data);
+      setFilteredUsers(res.data.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
 
   useEffect(() => {
@@ -108,7 +110,7 @@ const fetchUsers = async () => {
     } = formData;
 
     if (!employeeId || !name || !phoneNumber || !officialMailId || (!isEditing && !password) ||
-        !role || !designation || !gender || !dateOfJoining || initialSalary === '') {
+      !role || !designation || !gender || !dateOfJoining || initialSalary === '') {
       alert("Please fill all required fields");
       return;
     }
@@ -148,74 +150,96 @@ const fetchUsers = async () => {
   };
 
   return (
-    <div className="container mt-4">
-      <h2 className="mb-4">Employee Management</h2>
+  <div className="container mt-4">
+  {/* Search and Action Buttons (keep your existing code) */}
+  <Row className="mb-3">
+    <Col md={4}><Form.Control placeholder="Search by Name, Phone, Email" value={search} onChange={e => setSearch(e.target.value)} /></Col>
+    <Col md={4}><Form.Control placeholder="Search by Designation" value={designationSearch} onChange={e => setDesignationSearch(e.target.value)} /></Col>
+    <Col md={4} className="text-end">
+      <CSVLink
+        data={users}
+        filename="employees.csv"
+        className="btn btn-outline-success"
+      >
+        Export CSV
+      </CSVLink>
+      <Button className="ms-2" onClick={() => handleShowModal()}>Add Employee</Button>
+    </Col>
+  </Row>
 
-      <Row className="mb-3">
-        <Col md={4}><Form.Control placeholder="Search by Name, Phone, Email" value={search} onChange={e => setSearch(e.target.value)} /></Col>
-        <Col md={4}><Form.Control placeholder="Search by Designation" value={designationSearch} onChange={e => setDesignationSearch(e.target.value)} /></Col>
-        <Col md={4} className="text-end">
-          <CSVLink
-            data={users}
-            filename="employees.csv"
-            className="btn btn-outline-success"
-          >
-            Export CSV
-          </CSVLink>
-          <Button className="ms-2" onClick={() => handleShowModal()}>Add Employee</Button>
-        </Col>
-      </Row>
+  {/* 3-Column Card Layout */}
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {filteredUsers.map(user => (
+      <div key={user._id} className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
+        {/* Card Header */}
+        <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+          <span className="font-medium text-gray-700">{user.designation}</span>
+          <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+            {user.employeeId}
+          </span>
+        </div>
+        
+        {/* Card Body */}
+        <div className="p-4">
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="flex-shrink-0">
+              <img
+                src={
+                  user.profileImage
+                    ? `${UPLOADS_BASE}/${user.profileImage}`
+                    : 'https://cdn-icons-png.flaticon.com/512/847/847969.png'
+                }
+                alt="Profile"
+                className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
+                onError={(e) => {
+                  console.warn('Image failed to load:', user.profileImage);
+                  e.target.src = 'https://cdn-icons-png.flaticon.com/512/847/847969.png';
+                }}
+              />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">{user.name}</h3>
+              <p className="text-sm text-gray-500">{user.officialMailId}</p>
+            </div>
+          </div>
 
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>Avatar</th>
-            <th>Employee ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Designation</th>
-            <th>Salary</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredUsers.map(user => (
-            <tr key={user._id}>
-              <td>
-                <div className="bg-secondary text-white rounded-circle d-flex justify-content-center align-items-center" style={{ width: 40, height: 40 }}>
-                  {user.name?.[0] || 'U'}
-                </div>
-              </td>
-              <td>{user.employeeId}</td>
-              <td>{user.name}</td>
-              <td>{user.officialMailId}</td>
-              <td>{user.phoneNumber}</td>
-              <td>{user.designation}</td>
-              <td>
-                ₹{user.currentSalary?.toLocaleString()} <br />
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-sm text-gray-500">Phone</span>
+              <span className="text-sm font-medium text-gray-900">{user.phoneNumber}</span>
+            </div>
+            
+            <div className="flex justify-between">
+              <span className="text-sm text-gray-500">Salary</span>
+              <div className="text-right">
+                <span className="text-sm font-medium text-gray-900">
+                  ₹{user.currentSalary?.toLocaleString()}
+                </span>
                 {user.increments?.length > 0 && (
-                  <Badge bg="info" className="mt-1">{user.increments.length} Increments</Badge>
+                  <div className="text-xs text-blue-600 mt-1">
+                    {user.increments.length} increment(s)
+                  </div>
                 )}
-              </td>
-              <td>
-                <Button variant="primary" size="sm" onClick={() => handleShowModal(user)}>Edit</Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+              </div>
+            </div>
+          </div>
+        </div>
 
-
-      {/* <h5 className="mt-5">Salary Analysis</h5>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={users.map(u => ({ name: u.name, salary: u.currentSalary }))}>
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="salary" fill="#8884d8" />
-        </BarChart>
-      </ResponsiveContainer> */}
+        {/* Card Footer */}
+        <div className="bg-gray-50 px-4 py-3 border-t border-gray-200 flex justify-end">
+          <button
+            onClick={() => handleShowModal(user)}
+            className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Edit
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
 
       <Modal show={showModal} onHide={handleCloseModal} size="lg">
         <Modal.Header closeButton>
@@ -269,7 +293,7 @@ const fetchUsers = async () => {
           <Button variant="success" onClick={handleSubmit}>{isEditing ? 'Update' : 'Register'}</Button>
         </Modal.Footer>
       </Modal>
-    </div>
+</div>
   );
 };
 

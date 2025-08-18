@@ -1,5 +1,6 @@
 const Leave = require('../models/Leave');
 const User = require('../models/User');
+const Form = require('../models/Form');
 
 // STAFF: Apply for leave
 exports.applyLeave = async (req, res) => {
@@ -39,14 +40,53 @@ exports.getMyLeaves = async (req, res) => {
   }
 };
 
-// ADMIN/HR: Get all leaves
+// // ADMIN/HR: Get all leaves
+// exports.getAllLeaves = async (req, res) => {
+//   try {
+//     const leaves = await Leave.find()
+//       .sort({ fromDate: -1 })
+//       .populate('user', 'name employeeId role officeMailId profileImage');
+
+//     res.json(leaves);
+//   } catch (error) {
+//     console.error('Error fetching all leaves:', error);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// };
+
+// ADMIN/HR: Get all leaves with user profileImage from Form model
 exports.getAllLeaves = async (req, res) => {
   try {
     const leaves = await Leave.find()
       .sort({ fromDate: -1 })
-      .populate('user', 'name employeeId role officeMailId profileImage');
+      .populate('user', 'name employeeId role officeMailId'); // Don't populate profileImage here
 
-    res.json(leaves);
+    // Extract userIds from leaves
+    const userIds = leaves
+      .map(leave => leave.user?._id?.toString())
+      .filter(Boolean);
+
+    // Fetch corresponding forms to get profileImage
+    const forms = await Form.find({ userId: { $in: userIds } }, 'userId personalDetails.profileImage');
+
+    // Create a map of userId => profileImage
+    const profileImageMap = {};
+    forms.forEach(form => {
+      const userIdStr = form.userId.toString();
+      profileImageMap[userIdStr] = form.personalDetails?.profileImage || null;
+    });
+
+    // Add profileImage to each leave's user object
+    const updatedLeaves = leaves.map(leave => {
+      const leaveObj = leave.toObject();
+      const userIdStr = leave.user?._id?.toString();
+      if (userIdStr && leaveObj.user) {
+        leaveObj.user.profileImage = profileImageMap[userIdStr] || null;
+      }
+      return leaveObj;
+    });
+
+    res.json(updatedLeaves);
   } catch (error) {
     console.error('Error fetching all leaves:', error);
     res.status(500).json({ message: 'Server error' });

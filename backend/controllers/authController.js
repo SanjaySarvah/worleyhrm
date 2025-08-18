@@ -248,14 +248,56 @@ exports.resetPassword = async (req, res) => {
 
 
 // ✅ Get all users except password
+// exports.getUsers = async (req, res) => {
+//   try {
+//     const users = await User.find().select('-password'); // Exclude hashed password
+//     res.status(200).json({ data: users });
+//   } catch (err) {
+//     res.status(500).json({ msg: err.message });
+//   }
+// };
+
+
+
+// ✅ Get all users excluding password + profileImage from Form
 exports.getUsers = async (req, res) => {
   try {
-    const users = await User.find().select('-password'); // Exclude hashed password
-    res.status(200).json({ data: users });
+    // Fetch all users
+    const users = await User.find().select('-password');
+
+    // Fetch all forms with userId and profileImage
+    const forms = await Form.find({}, 'userId formId personalDetails.profileImage');
+
+    // Map userId => { profileImage, formId }
+    const formMap = {};
+    forms.forEach(form => {
+      if (form.userId) {
+        formMap[form.userId.toString()] = {
+          profileImage: form.personalDetails?.profileImage || null,
+          formId: form.formId || null,
+        };
+      }
+    });
+
+    // Merge form info into user
+    const usersWithImages = users.map(user => {
+      const userObj = user.toObject();
+      const userIdStr = user._id.toString();
+      const formData = formMap[userIdStr];
+
+      userObj.profileImage = formData?.profileImage || null;
+      userObj.formId = formData?.formId || null;
+
+      return userObj;
+    });
+
+    res.status(200).json({ data: usersWithImages });
   } catch (err) {
+    console.error('Error fetching users with profile images:', err);
     res.status(500).json({ msg: err.message });
   }
 };
+
 
 // — UPDATE ONE USER —
 exports.updateUser = async (req, res) => {
@@ -349,5 +391,6 @@ exports.getEmployeeList = async (req, res) => {
     res.status(500).json({ msg: err.message });
   }
 };
+
 
 

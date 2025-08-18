@@ -2,9 +2,87 @@
 @tailwind components;
 @tailwind utilities;
 
-.tab-head {
-  background-color: #1f58c5;
-  color: #ffffff;
-  padding: 10px;
-  border-radius: 15px;
+/* Dark mode variables - only if you need CSS variables */
+:root {
+  --bg-primary: theme('colors.white');
+  --text-primary: theme('colors.gray.800');
+  --bg-card: theme('colors.white');
+  --border-primary: theme('colors.gray.200');
+}
+
+.dark {
+  --bg-primary: theme('colors.gray.900');
+  --text-primary: theme('colors.gray.100');
+  --bg-card: theme('colors.gray.800');
+  --border-primary: theme('colors.gray.700');
+}
+
+/* Base transitions */
+@layer base {
+  html {
+    @apply transition-colors duration-300;
+  }
+  body {
+    @apply bg-background text-gray-800 dark:bg-gray-900 dark:text-gray-100;
+  }
+}
+
+/* Global Typography */
+body {
+  @apply font-sans;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* Buttons */
+.btn {
+  @apply inline-flex items-center justify-center px-4 py-2 rounded-xl font-medium transition;
+}
+.btn-primary {
+  @apply bg-primary text-white hover:bg-blue-900 dark:hover:bg-blue-800;
+}
+.btn-secondary {
+  @apply bg-secondary text-white hover:bg-blue-700 dark:hover:bg-blue-600;
+}
+.btn-outline {
+  @apply border border-primary text-primary hover:bg-primary hover:text-white 
+         dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-400 dark:hover:text-white;
+}
+
+/* Card */
+.card {
+  @apply rounded-xl shadow-card p-6;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
+}
+
+/* Input Field */
+.input {
+  @apply w-full rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary;
+  border: 1px solid var(--border-primary);
+  background-color: var(--bg-card);
+}
+
+/* Label */
+.label {
+  @apply text-sm font-medium mb-1;
+  color: var(--text-primary);
+}
+
+/* Title */
+.page-title {
+  @apply text-2xl font-semibold mb-6;
+  color: var(--text-primary);
+}
+
+/* Scrollbar - optional */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: theme('colors.gray.300');
+  border-radius: 4px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: theme('colors.gray.600');
 }

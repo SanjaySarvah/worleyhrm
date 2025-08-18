@@ -1,30 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './routes/ProtectedRoute';
 import PublicRoute from './routes/PublicRoute';
-import { useAuth } from './context/AuthContext';
 
 import Login from './pages/Login';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
-
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 
-import roleRoutes from './routes/roleRoutes.jsx'; // ✅ make sure to import the correct file
+import roleRoutes from './routes/roleRoutes.jsx';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import { ThemeProvider } from './context/ThemeContext';
+
 function AppLayout() {
   const location = useLocation();
   const { user } = useAuth();
+  const [collapsed, setCollapsed] = useState(false);
 
   const hideSidebar = /^\/(login|forgot-password|reset-password)/.test(location.pathname);
   const userRole = user?.role?.toLowerCase();
 
   return (
     <div className="d-flex">
-      {!hideSidebar && <Sidebar />}
-      <div className="flex-grow-1" style={{ marginLeft: hideSidebar ? 0 : '250px', width: '100%' }}>
+      {!hideSidebar && (
+        <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+      )}
+
+      <div
+        className="flex-grow-1 transition-all duration-300"
+        style={{
+          marginLeft: hideSidebar ? 0 : collapsed ? '4rem' : '16rem', // 64px or 256px
+          width: '100%',
+        }}
+      >
         {!hideSidebar && <TopBar />}
         <div className="p-3">
           <Routes>
@@ -59,10 +69,13 @@ function AppLayout() {
 
 export default function App() {
   return (
+
+
     <AuthProvider>
       <BrowserRouter>
         <AppLayout />
       </BrowserRouter>
     </AuthProvider>
+ 
   );
 }
